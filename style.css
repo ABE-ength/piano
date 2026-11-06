@@ -125,12 +125,37 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   box-shadow: 0 5px 0 rgba(0,0,0,.12); font-size: 15px; font-weight: 700; color: #45363a;
 }
+.song { position: relative; }
+.song .stamp { position: absolute; top: 2px; right: 6px; font-size: 20px; animation: bob .8s ease-in-out infinite alternate; }
 .song:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,.12); }
 .song .e { font-size: 44px; line-height: 1.1; }
 .song .t { line-height: 1.2; text-align: center; }
-.done { text-align: center; }
-.done .hooray { font-size: 70px; animation: dance .6s ease-in-out infinite; display: inline-block; }
-.done h2 { font-size: 34px; color: #ff6f9f; }
+/* ---- できたね ---- */
+#done { overflow: hidden; background: rgba(60,30,90,.45); }
+.rays { position: absolute; left: 50%; top: 50%; width: 260vmax; height: 260vmax; margin: -130vmax 0 0 -130vmax;
+  background: repeating-conic-gradient(rgba(255,240,150,.38) 0 10deg, rgba(255,255,255,0) 10deg 20deg);
+  animation: spin 14s linear infinite; pointer-events: none; }
+#fireworks { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.burst { position: absolute; transform: translate(-50%,-50%); animation: burst 1.3s ease-out forwards; }
+@keyframes burst { 0% { transform: translate(-50%,-50%) scale(.2); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 40px)) scale(1.2) rotate(200deg); opacity: 0; } }
+.done { text-align: center; z-index: 3; padding-top: 4px; background: linear-gradient(#fff, #fff6fb); border: 5px solid #ffd84d; }
+.done .medal { font-size: 72px; line-height: 1; display: inline-block; filter: drop-shadow(0 4px 4px rgba(0,0,0,.25)); }
+#done.play .medal { animation: medalIn .9s cubic-bezier(.2,1.6,.4,1) both, swing 1.6s ease-in-out .9s infinite; }
+@keyframes medalIn { from { transform: scale(0) rotate(-180deg); } to { transform: scale(1) rotate(0); } }
+@keyframes swing { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+#doneTitle { font-size: 34px; color: #ff6f9f; margin: 2px 0; text-shadow: 0 3px 0 #ffe1ee; }
+#doneTitle span { display: inline-block; }
+#done.play #doneTitle span { animation: letter .5s cubic-bezier(.2,1.8,.4,1) both, jump 1.2s ease-in-out 1.6s infinite; }
+@keyframes letter { from { transform: translateY(-60px) scale(0); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes jump { 0%,100% { transform: none; } 15% { transform: translateY(-8px); } }
+#doneSong { margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #6b5a60; }
+.stamps { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #b5892a; }
+.done .row { transition: opacity .4s; }
+.done .row.wait { opacity: 0; pointer-events: none; }
+.compact .done .medal { font-size: 54px; }
+.compact #doneTitle { font-size: 28px; }
+.compact #doneSong { font-size: 15px; }
 .done .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 #confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .conf { position: absolute; top: -40px; font-size: 30px; animation: fall linear forwards; }
@@ -170,3 +195,24 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 @keyframes wiggle { 30% { transform: scale(1.15) rotate(-10deg); } 60% { transform: scale(1.05) rotate(8deg); } }
 .compact .flag { width: 38px; height: 38px; }
 .narrow #buddy { display: none; }
+
+/* ---- まってね：同じ鍵盤を続けて押す回数 ---- */
+.pips { position: absolute; transform: translate(-50%, -50%); z-index: 6; display: flex; gap: 6px; padding: 6px 8px;
+  background: rgba(255,255,255,.92); border-radius: 999px; box-shadow: 0 3px 0 rgba(0,0,0,.15); pointer-events: none; }
+.pips i { width: 22px; height: 22px; border-radius: 50%; background: #ff6f9f; box-shadow: inset 0 -3px 0 rgba(0,0,0,.15); }
+.pips i.done { background: #fff; box-shadow: inset 0 0 0 3px #ffb3cf; }
+.pips b { font-size: 20px; color: #ff6f9f; }
+.pips.pulse { animation: pipsPop .45s cubic-bezier(.2,1.8,.4,1); }
+@keyframes pipsPop { from { transform: translate(-50%,-50%) scale(.4); } to { transform: translate(-50%,-50%) scale(1); } }
+.star.again { animation: starAgain .5s cubic-bezier(.2,1.8,.4,1), bob .6s ease-in-out .5s infinite alternate; }
+@keyframes starAgain { 0% { transform: translate(-50%,-100%) scale(.5) rotate(-40deg); } 100% { transform: translate(-50%,-100%) scale(1); } }
+
+/* ---- まってね：しばらく押せないときの案内 ---- */
+#kb .key { transition: filter .4s; }
+#kb.hinting .key:not(.target) { filter: brightness(.55) saturate(.6); }
+.hand { position: absolute; z-index: 7; font-size: 46px; transform: translate(-50%, -100%); pointer-events: none;
+  animation: tap 0.9s ease-in-out infinite; filter: drop-shadow(0 3px 3px rgba(0,0,0,.3)); }
+@keyframes tap { 0%,100% { margin-top: -18px; } 50% { margin-top: 0; } }
+.ripple { position: absolute; z-index: 6; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+  border: 5px solid #ffcf33; pointer-events: none; animation: ripple 1.3s ease-out infinite; }
+@keyframes ripple { from { transform: scale(.4); opacity: 1; } to { transform: scale(4); opacity: 0; } }

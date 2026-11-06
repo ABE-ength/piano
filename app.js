@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.1.0';
+const VERSION = '2.2.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -14,10 +14,10 @@ const TEXT = {
   ja: {
     songs: 'うた', stop: 'やめる', wait: 'まってね', along: 'いっしょに',
     slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい',
-    pick: '🎵 どの うたに する？', great: 'じょうず！', again: 'もういちど', other: 'ほかの うた', free: 'じゆうに ひく',
+    pick: '🎵 どの うたに する？', great: 'やったね！じょうず！', again: 'もういちど', other: 'ほかの うた', free: 'じゆうに ひく', stamps: 'スタンプ',
     settings: 'せってい（おとなよう）', volume: '音量', labels: '鍵盤に ドレミ を表示',
     guide: '「いっしょに」でお手本の音を鳴らす', close: 'とじる', soundby: 'ピアノの音',
-    help: '⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。<br>🇯🇵🇺🇸 右上の国旗で、ことばを切り替えられます。',
+    help: '⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。<br>🇺🇸🇯🇵 右上の国旗で、ことばを切り替えられます。',
     loading: 'じゅんび ちゅう…', loadErr: 'よみこめませんでした。ネットにつないで ひらきなおしてね',
     longpress: 'おとなの人は ながおし してね',
     notes: ['ド', 'ド', 'レ', 'レ', 'ミ', 'ファ', 'ファ', 'ソ', 'ソ', 'ラ', 'ラ', 'シ'],
@@ -25,10 +25,10 @@ const TEXT = {
   en: {
     songs: 'Songs', stop: 'Stop', wait: 'Wait for me', along: 'Play along',
     slow: 'Slow', normal: 'Normal', fast: 'Fast',
-    pick: '🎵 Pick a song!', great: 'Great job!', again: 'Again', other: 'Other songs', free: 'Free play',
+    pick: '🎵 Pick a song!', great: 'Great job!', again: 'Again', other: 'Other songs', free: 'Free play', stamps: 'Stamps',
     settings: 'Settings (for grown-ups)', volume: 'Volume', labels: 'Show note names on keys',
     guide: 'Play the melody in “Play along”', close: 'Close', soundby: 'Piano sound',
-    help: '⭐ Wait for me: the song moves on when the glowing key is pressed.<br>🎶 Play along: keys light up with the music. Change the speed with 🐢🚶🐇.<br>🇯🇵🇺🇸 Tap a flag (top right) to change the language.',
+    help: '⭐ Wait for me: the song moves on when the glowing key is pressed.<br>🎶 Play along: keys light up with the music. Change the speed with 🐢🚶🐇.<br>🇺🇸🇯🇵 Tap a flag (top right) to change the language.',
     loading: 'Getting ready…', loadErr: 'Could not load. Please connect to the internet and reopen.',
     longpress: 'Grown-ups: press and hold',
     notes: ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'],
@@ -127,6 +127,23 @@ class Piano {
     if (this.voices.get(v.m) === v) this.voices.delete(v.m);
   }
   allOff() { for (const v of [...this.voices.values()]) this.release(v, 0.05); }
+  // パチパチ（拍手の音を作る）
+  applause(sec) {
+    const c = this.ctx, t0 = c.currentTime;
+    if (!this.clapBuf) {
+      const n = Math.floor(c.sampleRate * 0.03); this.clapBuf = c.createBuffer(1, n, c.sampleRate);
+      const d = this.clapBuf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+    }
+    const count = Math.floor(sec * 38);
+    for (let i = 0; i < count; i++) {
+      const t = t0 + Math.random() * sec;
+      const fade = 1 - (t - t0) / sec;
+      const src = c.createBufferSource(); src.buffer = this.clapBuf;
+      const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900 + Math.random() * 1600; bp.Q.value = 1.2;
+      const g = c.createGain(); g.gain.value = (0.25 + Math.random() * 0.35) * fade;
+      src.connect(bp).connect(g).connect(this.bus); src.start(t);
+    }
+  }
 }
 const piano = new Piano();
 piano.load().then(() => $('#loading').classList.add('gone'))
@@ -252,6 +269,10 @@ const SONGS = [
     n: 'F4 G4 A4 F4 F4 G4 A4 F4 A4 Bb4 C5:2 A4 Bb4 C5:2 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 F4 C4 F4:2 F4 C4 F4:2' },
   { id: 'row', e: '⛵', ja: 'こげこげボート', en: 'Row Your Boat', b: '#d9f4ff', bpm: 110,
     n: 'C4:1.5 C4:1.5 C4 D4:.5 E4:1.5 E4 D4:.5 E4 F4:.5 G4:3 C5:.5 C5:.5 C5:.5 G4:.5 G4:.5 G4:.5 E4:.5 E4:.5 E4:.5 C4:.5 C4:.5 C4:.5 G4 F4:.5 E4 D4:.5 C4:3' },
+  { id: 'susanna', e: '🪕', ja: 'おお スザンナ', en: 'Oh! Susanna', b: '#fdebd3', bpm: 130,
+    n: 'C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 D4 C4:3 F4:2 F4:2 A4:2 A4:1.5 A4:.5 G4 G4 E4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 D4 C4:3' },
+  { id: 'camptown', e: '🐎', ja: 'くさけいば', en: 'Camptown Races', b: '#e8f6dc', bpm: 120,
+    n: 'G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 E4:.5 D4:1.5 E4:.5 D4:1.5 G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 D4:.5 D4:.5 E4:.5 D4:.5 C4:2' },
   { id: 'hotcross', e: '🥐', ja: 'ホットクロスバン', en: 'Hot Cross Buns', b: '#fff1dc', bpm: 110,
     n: 'E4 D4 C4:2 E4 D4 C4:2 C4:.5 C4:.5 C4:.5 C4:.5 D4:.5 D4:.5 D4:.5 D4:.5 E4 D4 C4:2' },
   { id: 'joy', e: '🎵', ja: 'よろこびのうた', en: 'Ode to Joy', b: '#fff0d6', bpm: 110,
@@ -271,11 +292,24 @@ function parse(str) {
   });
 }
 SONGS.forEach(s => s.notes = parse(s.n));
+// 子どもが喜びそうな順に並べる
+const ORDER = ['kira', 'birthday', 'kaeru', 'chou', 'mary', 'farm', 'camptown', 'alps', 'jingle', 'london',
+  'spider', 'frere', 'row', 'susanna', 'hotcross', 'joy', 'lullaby', 'elise'];
+SONGS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
 /* ================= うたの進め方 ================= */
 const star = document.createElement('div'); star.className = 'star hidden'; star.textContent = '⭐'; fx.appendChild(star);
+const pips = document.createElement('div'); pips.className = 'pips hidden'; fx.appendChild(pips);
+const hand = document.createElement('div'); hand.className = 'hand hidden'; hand.textContent = '👇'; fx.appendChild(hand);
+const ripple = document.createElement('div'); ripple.className = 'ripple hidden'; fx.appendChild(ripple);
+
+// 「完了したうた」のスタンプ
+let stamps = {};
+try { stamps = JSON.parse(localStorage.getItem('piano2.stamps') || '{}'); } catch (e) {}
+const saveStamps = () => { try { localStorage.setItem('piano2.stamps', JSON.stringify(stamps)); } catch (e) {} };
+
 const song = {
-  cur: null, idx: 0, timers: [], guideNotes: new Set(), lit: null,
+  cur: null, idx: 0, timers: [], hintTimers: [], guideNotes: new Set(), lit: null,
   start(s) {
     this.stop(true);
     this.cur = s; this.idx = 0;
@@ -283,11 +317,12 @@ const song = {
     $('#nowEmoji').textContent = s.e; $('#nowTitle').textContent = s[S.lang];
     $('#songBtn').classList.add('hidden'); $('#stopBtn').classList.remove('hidden');
     this.progress();
-    if (S.mode === 'wait') this.light(s.notes[0].m);
+    if (S.mode === 'wait') this.showTarget();
     else this.playAlong();
   },
-  stop(silent) {
+  stop() {
     this.timers.forEach(clearTimeout); this.timers = [];
+    this.clearHint();
     for (const m of this.guideNotes) piano.noteOff(m);
     this.guideNotes.clear();
     this.light(null);
@@ -295,14 +330,54 @@ const song = {
     $('#now').classList.add('hidden');
     $('#songBtn').classList.remove('hidden'); $('#stopBtn').classList.add('hidden');
   },
-  light(m) {
-    if (this.lit != null) keyEls.get(this.lit)?.classList.remove('target');
+  light(m, count = 0, total = count) {
+    if (this.lit != null && this.lit !== m) keyEls.get(this.lit)?.classList.remove('target');
     this.lit = m;
-    if (m == null) { star.classList.add('hidden'); return; }
+    if (m == null) { star.classList.add('hidden'); pips.classList.add('hidden'); return; }
     keyEls.get(m)?.classList.add('target');
     const p = keyPos(m);
     star.style.left = p.x + 'px'; star.style.top = p.top + 'px';
     star.classList.remove('hidden');
+    // 同じ鍵盤を続けて押すときは、押す回数ぶんの丸を表示
+    if (total >= 2) {
+      // ● = あと押す回数、○ = もう押した回数
+      pips.innerHTML = total > 4 ? `<b>×${count}</b>` : '<i class="done"></i>'.repeat(total - count) + '<i></i>'.repeat(count);
+      pips.style.left = p.x + 'px'; pips.style.top = (p.top + p.h * 0.5) + 'px';
+      pips.classList.remove('hidden');
+      pips.classList.remove('pulse'); void pips.offsetWidth; pips.classList.add('pulse');
+    } else pips.classList.add('hidden');
+  },
+  // まってねモード：次に押す鍵盤を光らせる
+  showTarget() {
+    const ns = this.cur.notes, m = ns[this.idx].m;
+    let run = 1; while (this.idx + run < ns.length && ns[this.idx + run].m === m) run++;
+    const again = this.lit === m && this.runTotal > 1;
+    if (!again) this.runTotal = run;
+    this.light(m, run, this.runTotal);
+    if (again) {              // 同じ鍵盤がもう一回：星がぴょんとはねて知らせる
+      star.classList.remove('again'); void star.offsetWidth; star.classList.add('again');
+    }
+    this.startHint();
+  },
+  // しばらく押せないときの案内
+  startHint() {
+    this.clearHint();
+    const m = this.lit;
+    this.hintTimers.push(setTimeout(() => {
+      const p = keyPos(m); if (!p) return;
+      kb.classList.add('hinting');
+      hand.style.left = p.x + 'px'; hand.style.top = (p.top + p.h * 0.62) + 'px';
+      ripple.style.left = p.x + 'px'; ripple.style.top = (p.top + p.h * 0.62) + 'px';
+      hand.classList.remove('hidden'); ripple.classList.remove('hidden');
+    }, 3500));
+    const tone = () => { if (this.lit === m && !downCount.has(m)) { piano.noteOn(m, 0.35); setTimeout(() => { if (!downCount.has(m)) piano.noteOff(m); }, 500); } };
+    this.hintTimers.push(setTimeout(tone, 6000));
+    this.hintTimers.push(setTimeout(tone, 11000));
+  },
+  clearHint() {
+    this.hintTimers.forEach(clearTimeout); this.hintTimers = [];
+    kb.classList.remove('hinting');
+    hand.classList.add('hidden'); ripple.classList.add('hidden');
   },
   progress() { $('#barFill').style.width = (this.cur ? this.idx / this.cur.notes.length * 100 : 0) + '%'; },
   onPress(m) {
@@ -310,8 +385,8 @@ const song = {
     if (m !== this.cur.notes[this.idx].m) return;
     sparkFx(m);
     this.idx++; this.progress();
-    if (this.idx >= this.cur.notes.length) { this.light(null); this.timers.push(setTimeout(() => this.finish(), 600)); }
-    else this.light(this.cur.notes[this.idx].m);
+    if (this.idx >= this.cur.notes.length) { this.clearHint(); this.light(null); this.timers.push(setTimeout(() => this.finish(), 500)); }
+    else this.showTarget();
   },
   playAlong() {
     const s = this.cur, beat = 60 / (s.bpm * S.speed) * 1000;
@@ -319,7 +394,7 @@ const song = {
     s.notes.forEach((n, i) => {
       const dur = n.d * beat;
       this.timers.push(setTimeout(() => {
-        this.light(n.m); this.idx = i + 1; this.progress();
+        this.light(null); this.light(n.m); this.idx = i + 1; this.progress();
         if (S.guide) { piano.noteOn(n.m, 0.55); this.guideNotes.add(n.m); }
       }, t));
       this.timers.push(setTimeout(() => {
@@ -332,28 +407,64 @@ const song = {
   },
   finish() {
     const s = this.cur;
-    this.stop(true);
+    this.stop();
     this.last = s;
-    celebrate();
+    stamps[s.id] = (stamps[s.id] || 0) + 1; saveStamps(); buildGrid();
+    celebrate(s);
   },
 };
 
-/* ================= できたね ================= */
-function celebrate() {
+/* ================= できたね（お祝い） ================= */
+function fanfare() {
+  const at = (ms, ms2, notes, v = 0.7) => setTimeout(() => notes.forEach(m => piano.noteOn(m, v)), ms);
+  // パッパッパ パーン！
+  at(0, 0, [60, 67]); at(150, 0, [60, 67]); at(300, 0, [60, 67]);
+  at(450, 0, [64, 72], 0.8);
+  at(800, 0, [62, 69]); at(950, 0, [65, 71]);
+  at(1100, 0, [60, 64, 67, 72, 76], 0.95);
+  // キラキラ〜（高い音がかけあがる）
+  [84, 86, 88, 91, 93, 96, 98, 100].forEach((m, i) => setTimeout(() => piano.noteOn(m, 0.35), 1500 + i * 70));
+  setTimeout(() => piano.applause(2.6), 1100);
+}
+function burst(box, x, y, n, items, dist) {
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement('span');
+    c.className = 'burst'; c.textContent = items[Math.floor(Math.random() * items.length)];
+    const ang = Math.random() * Math.PI * 2, d = dist * (0.5 + Math.random() * 0.6);
+    c.style.left = x + '%'; c.style.top = y + '%';
+    c.style.setProperty('--dx', Math.cos(ang) * d + 'px'); c.style.setProperty('--dy', Math.sin(ang) * d + 'px');
+    c.style.fontSize = (20 + Math.random() * 22) + 'px';
+    box.appendChild(c); setTimeout(() => c.remove(), 1500);
+  }
+}
+function celebrate(s) {
   show('#done');
+  const done = $('#done');
+  done.classList.remove('play'); void done.offsetWidth; done.classList.add('play');
   buddy.classList.add('dance');
+  $('#doneSong').textContent = `${s.e} ${s[S.lang]}`;
+  $('#stampCount').textContent = Object.keys(stamps).length;
+  // 文字を1つずつはねさせる
+  const h = $('#doneTitle'); const word = T('great');
+  h.innerHTML = [...word].map((ch, i) => `<span style="animation-delay:${0.5 + i * 0.08}s">${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
   const box = $('#confetti'); box.innerHTML = '';
-  const items = ['🎉', '⭐', '🎈', '🌸', '🍬', '✨', '🎵', '💖'];
-  for (let i = 0; i < 28; i++) {
+  const items = ['🎉', '⭐', '🎈', '🌸', '🍬', '✨', '🎵', '💖', '🌟', '🍭'];
+  for (let i = 0; i < 46; i++) {
     const c = document.createElement('span');
     c.className = 'conf'; c.textContent = items[i % items.length];
     c.style.left = Math.random() * 100 + '%';
-    c.style.animationDuration = (2.2 + Math.random() * 2) + 's';
-    c.style.animationDelay = Math.random() * 1.2 + 's';
+    c.style.animationDuration = (2.4 + Math.random() * 2.4) + 's';
+    c.style.animationDelay = Math.random() * 2 + 's';
     box.appendChild(c);
   }
-  // ジャーン♪（ドミソド）
-  [[60, 0], [64, 90], [67, 180], [72, 270]].forEach(([m, d]) => setTimeout(() => piano.noteOn(m, 0.7), d));
+  // 花火
+  const fw = $('#fireworks'); fw.innerHTML = '';
+  [[50, 45, 0], [20, 30, 500], [80, 30, 800], [30, 60, 1200], [70, 60, 1500], [50, 25, 1900]].forEach(([x, y, d]) =>
+    setTimeout(() => burst(fw, x, y, 14, ['✨', '⭐', '🌟', '💫', '💖'], 150), d));
+  // ボタンは少し遅れて出す（すぐに押して閉じてしまわないように）
+  const row = $('#done .row'); row.classList.add('wait');
+  setTimeout(() => row.classList.remove('wait'), 1800);
+  fanfare();
 }
 
 /* ================= 画面の切り替え ================= */
@@ -369,7 +480,7 @@ function buildGrid() {
   SONGS.forEach(s => {
     const b = document.createElement('button');
     b.className = 'song'; b.style.setProperty('--b', s.b);
-    b.innerHTML = `<span class="e">${s.e}</span><span class="t"></span>`;
+    b.innerHTML = `<span class="e">${s.e}</span><span class="t"></span>${stamps[s.id] ? '<span class="stamp">🌟</span>' : ''}`;
     b.querySelector('.t').textContent = s[S.lang];
     b.onclick = () => { piano.unlock(); hideAll(); song.start(s); };
     grid.appendChild(b);

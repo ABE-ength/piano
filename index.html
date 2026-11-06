@@ -72,12 +72,6 @@
         </svg>
       </div>
       <div id="flags" role="group" aria-label="ことば / Language">
-        <button class="flag" data-lang="ja" aria-label="にほんご">
-          <svg viewBox="0 0 40 40"><defs><clipPath id="cj"><circle cx="20" cy="20" r="18"/></clipPath></defs>
-            <g clip-path="url(#cj)"><rect width="40" height="40" fill="#fff"/><circle cx="20" cy="20" r="8" fill="#e8384f"/></g>
-            <circle cx="20" cy="20" r="18" fill="none" stroke="#f1d9de" stroke-width="2"/>
-            <circle cx="11" cy="11" r="3" fill="#fff" opacity=".9"/></svg>
-        </button>
         <button class="flag" data-lang="en" aria-label="English">
           <svg viewBox="0 0 40 40"><defs><clipPath id="ce"><circle cx="20" cy="20" r="18"/></clipPath></defs>
             <g clip-path="url(#ce)"><rect width="40" height="40" fill="#fff"/>
@@ -86,6 +80,12 @@
               <g fill="#fff"><circle cx="5" cy="5" r="1.4"/><circle cx="11" cy="5" r="1.4"/><circle cx="17" cy="5" r="1.4"/><circle cx="8" cy="10" r="1.4"/><circle cx="14" cy="10" r="1.4"/><circle cx="5" cy="15" r="1.4"/><circle cx="11" cy="15" r="1.4"/><circle cx="17" cy="15" r="1.4"/></g></g>
             <circle cx="20" cy="20" r="18" fill="none" stroke="#dfe4f5" stroke-width="2"/>
             <circle cx="28" cy="10" r="2.5" fill="#fff" opacity=".8"/></svg>
+        </button>
+        <button class="flag" data-lang="ja" aria-label="にほんご">
+          <svg viewBox="0 0 40 40"><defs><clipPath id="cj"><circle cx="20" cy="20" r="18"/></clipPath></defs>
+            <g clip-path="url(#cj)"><rect width="40" height="40" fill="#fff"/><circle cx="20" cy="20" r="8" fill="#e8384f"/></g>
+            <circle cx="20" cy="20" r="18" fill="none" stroke="#f1d9de" stroke-width="2"/>
+            <circle cx="11" cy="11" r="3" fill="#fff" opacity=".9"/></svg>
         </button>
       </div>
       <button id="setBtn" class="pill" aria-label="せってい（ながおし）">⚙</button>
@@ -117,9 +117,13 @@
 
   <!-- できたね -->
   <div id="done" class="overlay hidden">
+    <div class="rays"></div>
+    <div id="fireworks"></div>
     <div class="panel done">
-      <div class="hooray">🎉</div>
-      <h2 data-i18n="great">じょうず！</h2>
+      <div class="medal">🏅</div>
+      <h2 id="doneTitle"></h2>
+      <p id="doneSong"></p>
+      <p class="stamps">🌟 <span data-i18n="stamps">スタンプ</span> × <b id="stampCount">0</b></p>
       <div class="row">
         <button id="againBtn" class="pill big">🔁 <span data-i18n="again">もういちど</span></button>
         <button id="otherBtn" class="pill big">🎵 <span data-i18n="other">ほかの うた</span></button>
