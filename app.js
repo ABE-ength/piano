@@ -1,11 +1,11 @@
 'use strict';
-const VERSION = '2.4.0';
+const VERSION = '2.5.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
 /* ================= せってい ================= */
 const S = { mode: 'wait', speed: 1, volume: 0.85, labels: true, guide: true,
-  lang: (navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en' };
+  lang: (l => l.startsWith('ja') ? 'ja' : l.startsWith('zh') ? 'zh' : 'en')(navigator.language || 'ja') };
 try { Object.assign(S, JSON.parse(localStorage.getItem('piano2.settings') || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem('piano2.settings', JSON.stringify(S)); } catch (e) {} };
 
@@ -17,7 +17,7 @@ const TEXT = {
     pick: '🎵 どの うたに する？', great: 'やったね！じょうず！', again: 'もういちど', other: 'ほかの うた', free: 'じゆうに ひく', stamps: 'スタンプ',
     settings: 'せってい（おとなよう）', volume: '音量', labels: '鍵盤に ドレミ を表示',
     guide: '「いっしょに」でお手本の音を鳴らす', close: 'とじる', soundby: 'ピアノの音',
-    help: '⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。<br>🇺🇸🇯🇵 右上の国旗で、ことばを切り替えられます。',
+    help: '⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。<br>右上のマークで、ことば（英語・日本語・中国語）を切り替えられます。',
     loading: 'じゅんび ちゅう…', loadErr: 'よみこめませんでした。ネットにつないで ひらきなおしてね',
     longpress: 'おとなの人は ながおし してね',
     notes: ['ド', 'ド', 'レ', 'レ', 'ミ', 'ファ', 'ファ', 'ソ', 'ソ', 'ラ', 'ラ', 'シ'],
@@ -28,20 +28,32 @@ const TEXT = {
     pick: '🎵 Pick a song!', great: 'Great job!', again: 'Again', other: 'Other songs', free: 'Free play', stamps: 'Stamps',
     settings: 'Settings (for grown-ups)', volume: 'Volume', labels: 'Show note names on keys',
     guide: 'Play the melody in “Play along”', close: 'Close', soundby: 'Piano sound',
-    help: '⭐ Wait for me: the song moves on when the glowing key is pressed.<br>🎶 Play along: keys light up with the music. Change the speed with 🐢🚶🐇.<br>🇺🇸🇯🇵 Tap a flag (top right) to change the language.',
+    help: '⭐ Wait for me: the song moves on when the glowing key is pressed.<br>🎶 Play along: keys light up with the music. Change the speed with 🐢🚶🐇.<br>Tap a mark (top right) to change the language (English / Japanese / Chinese).',
     loading: 'Getting ready…', loadErr: 'Could not load. Please connect to the internet and reopen.',
     longpress: 'Grown-ups: press and hold',
     notes: ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'],
   },
 };
+TEXT.zh = {
+  songs: '歌曲', stop: '停止', wait: '等等我', along: '一起彈',
+  slow: '慢慢', normal: '普通', fast: '快快',
+  pick: '🎵 要彈哪首歌？', great: '太棒了！好厲害！', again: '再一次', other: '其他歌曲', free: '自由彈奏', stamps: '印章',
+  settings: '設定（給大人）', volume: '音量', labels: '在琴鍵上顯示音名',
+  guide: '「一起彈」時播放示範旋律', close: '關閉', soundby: '鋼琴音色',
+  help: '⭐ 等等我：按下發光的琴鍵，歌曲才會繼續。<br>🎶 一起彈：琴鍵會跟著音樂發光，可用 🐢🚶🐇 調整速度。<br>右上角的圖示可以切換語言（英文・日文・中文）。',
+  loading: '準備中…', loadErr: '無法載入。請連上網路後重新開啟。',
+  longpress: '大人請長按',
+  notes: ['Do', 'Do♯', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si'],
+};
+if (!TEXT[S.lang]) S.lang = 'ja';
 const T = k => TEXT[S.lang][k];
 function applyLang() {
-  document.documentElement.lang = S.lang;
+  document.documentElement.lang = S.lang === 'zh' ? 'zh-Hant' : S.lang;
   document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = T(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = T(el.dataset.i18nHtml));
   document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
   document.querySelectorAll('.flag').forEach(f => f.classList.toggle('sel', f.dataset.lang === S.lang));
-  document.title = S.lang === 'ja' ? 'ピアノ' : 'Piano';
+  document.title = { ja: 'ピアノ', en: 'Piano', zh: '鋼琴' }[S.lang];
 }
 applyLang();
 
@@ -245,41 +257,41 @@ document.addEventListener('pointerdown', () => piano.unlock(), { capture: true }
 /* ================= うた（10曲） ================= */
 // 音名:拍（拍を省くと1拍）。著作権の切れた曲・昔からの歌のメロディです。
 const SONGS = [
-  { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', b: '#fff3b8', bpm: 100,
+  { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', zh: '小星星', b: '#fff3b8', bpm: 100,
     n: 'C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2' },
-  { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', b: '#ffe8c2', bpm: 100,
+  { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', zh: '生日快樂', b: '#ffe8c2', bpm: 100,
     n: 'C4:.75 C4:.25 D4 C4 F4 E4:2 C4:.75 C4:.25 D4 C4 G4 F4:2 C4:.75 C4:.25 C5 A4 F4 E4 D4 Bb4:.75 Bb4:.25 A4 F4 G4 F4:3' },
-  { id: 'kaeru', e: '🐸', ja: 'かえるのうた', en: 'Frog Song', b: '#d6f5c9', bpm: 110,
+  { id: 'kaeru', e: '🐸', ja: 'かえるのうた', en: 'Frog Song', zh: '青蛙之歌', b: '#d6f5c9', bpm: 110,
     n: 'C4 D4 E4 F4 E4 D4 C4:2 E4 F4 G4 A4 G4 F4 E4:2 C4:2 C4:2 C4:2 C4:2 C4:.5 C4:.5 D4:.5 D4:.5 E4:.5 E4:.5 F4:.5 F4:.5 E4 D4 C4:2' },
-  { id: 'chou', e: '🦋', ja: 'ちょうちょう', en: 'Lightly Row', b: '#ffe0ef', bpm: 110,
+  { id: 'chou', e: '🦋', ja: 'ちょうちょう', en: 'Lightly Row', zh: '小蜜蜂', b: '#ffe0ef', bpm: 110,
     n: 'G4 E4 E4:2 F4 D4 D4:2 C4 D4 E4 F4 G4 G4 G4:2 G4 E4 E4 E4 F4 D4 D4 D4 C4 E4 G4 G4 E4 E4 E4:2 D4 D4 D4 D4 D4 E4 F4:2 E4 E4 E4 E4 E4 F4 G4:2 G4 E4 E4:2 F4 D4 D4:2 C4 E4 G4 G4 C4:4' },
-  { id: 'mary', e: '🐑', ja: 'メリーさんのひつじ', en: 'Mary Had a Little Lamb', b: '#f3ecff', bpm: 110,
+  { id: 'mary', e: '🐑', ja: 'メリーさんのひつじ', en: 'Mary Had a Little Lamb', zh: '瑪莉有隻小綿羊', b: '#f3ecff', bpm: 110,
     n: 'E4:1.5 D4:.5 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4:1.5 D4:.5 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4' },
-  { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', b: '#e9f7d4', bpm: 120,
+  { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', zh: '王老先生有塊地', b: '#e9f7d4', bpm: 120,
     n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
-  { id: 'alps', e: '🏔️', ja: 'アルプスいちまんじゃく', en: 'Yankee Doodle', b: '#e3f0ff', bpm: 150,
+  { id: 'alps', e: '🏔️', ja: 'アルプスいちまんじゃく', en: 'Yankee Doodle', zh: '洋基歌', b: '#e3f0ff', bpm: 150,
     n: 'F4 F4 G4 A4 F4 A4 G4 C4 F4 F4 G4 A4 F4:2 E4:2 F4 F4 G4 A4 Bb4 A4 G4 F4 E4 C4 D4 E4 F4:2 F4:2' },
-  { id: 'jingle', e: '🔔', ja: 'ジングルベル', en: 'Jingle Bells', b: '#ffdcdc', bpm: 130,
+  { id: 'jingle', e: '🔔', ja: 'ジングルベル', en: 'Jingle Bells', zh: '鈴兒響叮噹', b: '#ffdcdc', bpm: 130,
     n: 'E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4:1.5 F4:.5 F4 E4 E4 E4:.5 E4:.5 E4 D4 D4 E4 D4:2 G4:2 E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4 F4 F4 E4 E4 E4:.5 E4:.5 G4 G4 F4 D4 C4:4' },
-  { id: 'london', e: '🌉', ja: 'ロンドンばし', en: 'London Bridge', b: '#e0f1ff', bpm: 110,
+  { id: 'london', e: '🌉', ja: 'ロンドンばし', en: 'London Bridge', zh: '倫敦鐵橋', b: '#e0f1ff', bpm: 110,
     n: 'G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4 E4 F4:2 E4 F4 G4:2 G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4:2 G4:2 E4 C4:3' },
-  { id: 'spider', e: '🕷️', ja: 'ちいさなクモさん', en: 'Itsy Bitsy Spider', b: '#eaf4ff', bpm: 110,
+  { id: 'spider', e: '🕷️', ja: 'ちいさなクモさん', en: 'Itsy Bitsy Spider', zh: '小蜘蛛', b: '#eaf4ff', bpm: 110,
     n: 'C4:.5 F4 F4:.5 F4 G4:.5 A4:1.5 A4 A4:.5 G4 F4:.5 G4 A4:.5 F4:3 A4:1.5 A4 Bb4:.5 C5:3 C5 Bb4:.5 A4 Bb4:.5 C5:1.5 A4:3 F4:1.5 F4 G4:.5 A4:3 A4 G4:.5 F4 G4:.5 A4:1.5 F4:3 C4:.5 C4:.5 F4 F4:.5 F4 G4:.5 A4:1.5 A4 A4:.5 G4 F4:.5 G4 A4:.5 F4:3' },
-  { id: 'frere', e: '😴', ja: 'フレール・ジャック', en: 'Frère Jacques', b: '#fff0f6', bpm: 110,
+  { id: 'frere', e: '😴', ja: 'フレール・ジャック', en: 'Frère Jacques', zh: '兩隻老虎', b: '#fff0f6', bpm: 110,
     n: 'F4 G4 A4 F4 F4 G4 A4 F4 A4 Bb4 C5:2 A4 Bb4 C5:2 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 F4 C4 F4:2 F4 C4 F4:2' },
-  { id: 'row', e: '⛵', ja: 'こげこげボート', en: 'Row Your Boat', b: '#d9f4ff', bpm: 110,
+  { id: 'row', e: '⛵', ja: 'こげこげボート', en: 'Row Your Boat', zh: '划船歌', b: '#d9f4ff', bpm: 110,
     n: 'C4:1.5 C4:1.5 C4 D4:.5 E4:1.5 E4 D4:.5 E4 F4:.5 G4:3 C5:.5 C5:.5 C5:.5 G4:.5 G4:.5 G4:.5 E4:.5 E4:.5 E4:.5 C4:.5 C4:.5 C4:.5 G4 F4:.5 E4 D4:.5 C4:3' },
-  { id: 'susanna', e: '🪕', ja: 'おお スザンナ', en: 'Oh! Susanna', b: '#fdebd3', bpm: 130,
+  { id: 'susanna', e: '🪕', ja: 'おお スザンナ', en: 'Oh! Susanna', zh: '噢！蘇珊娜', b: '#fdebd3', bpm: 130,
     n: 'C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 D4 C4:3 F4:2 F4:2 A4:2 A4:1.5 A4:.5 G4 G4 E4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 D4 C4:3' },
-  { id: 'camptown', e: '🐎', ja: 'くさけいば', en: 'Camptown Races', b: '#e8f6dc', bpm: 120,
+  { id: 'camptown', e: '🐎', ja: 'くさけいば', en: 'Camptown Races', zh: '康城賽馬', b: '#e8f6dc', bpm: 120,
     n: 'G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 E4:.5 D4:1.5 E4:.5 D4:1.5 G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 D4:.5 D4:.5 E4:.5 D4:.5 C4:2' },
-  { id: 'hotcross', e: '🥐', ja: 'ホットクロスバン', en: 'Hot Cross Buns', b: '#fff1dc', bpm: 110,
+  { id: 'hotcross', e: '🥐', ja: 'ホットクロスバン', en: 'Hot Cross Buns', zh: '熱十字麵包', b: '#fff1dc', bpm: 110,
     n: 'E4 D4 C4:2 E4 D4 C4:2 C4:.5 C4:.5 C4:.5 C4:.5 D4:.5 D4:.5 D4:.5 D4:.5 E4 D4 C4:2' },
-  { id: 'joy', e: '🎵', ja: 'よろこびのうた', en: 'Ode to Joy', b: '#fff0d6', bpm: 110,
+  { id: 'joy', e: '🎵', ja: 'よろこびのうた', en: 'Ode to Joy', zh: '歡樂頌', b: '#fff0d6', bpm: 110,
     n: 'E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4:1.5 D4:.5 D4:2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4:1.5 C4:.5 C4:2' },
-  { id: 'lullaby', e: '🌙', ja: 'ブラームスのこもりうた', en: "Brahms' Lullaby", b: '#e6e6ff', bpm: 90,
+  { id: 'lullaby', e: '🌙', ja: 'ブラームスのこもりうた', en: "Brahms' Lullaby", zh: '布拉姆斯搖籃曲', b: '#e6e6ff', bpm: 90,
     n: 'E4:.5 E4:.5 G4:2 E4:.5 E4:.5 G4:2 E4:.5 G4:.5 C5 B4:1.5 A4:.5 A4 G4 D4:.5 E4:.5 F4 D4 D4:.5 E4:.5 F4:2 D4:.5 F4:.5 B4:.5 A4:.5 G4 B4 C5:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4 G4 A4 G4:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4 E4:.5 D4:.5 C4:3' },
-  { id: 'elise', e: '🎹', ja: 'エリーゼのために', en: 'Für Elise', b: '#f6eaff', bpm: 100,
+  { id: 'elise', e: '🎹', ja: 'エリーゼのために', en: 'Für Elise', zh: '給愛麗絲', b: '#f6eaff', bpm: 100,
     n: 'E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 G#4:.5 B4:.5 C5:1.5 E4:.5 E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 C5:.5 B4:.5 A4:3' },
 ];
 const NAME = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -498,7 +510,7 @@ document.querySelectorAll('.flag').forEach(f => f.onclick = () => {
   applyLang(); buildGrid(); buildKeys();
   if (song.lit != null) { const m = song.lit; song.lit = null; song.light(m); }
   if (song.cur) $('#nowTitle').textContent = song.cur[S.lang];
-  piano.unlock(); piano.noteOn(S.lang === 'ja' ? 72 : 67, 0.6);
+  piano.unlock(); piano.noteOn({ en: 67, ja: 72, zh: 76 }[S.lang], 0.6);
 });
 $('#songBtn').onclick = () => { piano.unlock(); show('#picker'); };
 $('#stopBtn').onclick = () => song.stop();

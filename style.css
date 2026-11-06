@@ -213,7 +213,8 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 .flag.sel { opacity: 1; transform: scale(1); animation: wiggle .5s ease-out; }
 .flag:active { transform: scale(.9); }
 @keyframes wiggle { 30% { transform: scale(1.15) rotate(-10deg); } 60% { transform: scale(1.05) rotate(8deg); } }
-.compact .flag { width: 38px; height: 38px; }
+.compact .flag { width: 36px; height: 36px; }
+.narrow #flags { gap: 2px; }
 .narrow #buddy { display: none; }
 
 /* ---- まってね：同じ鍵盤を続けて押すとき、押すたびに色が変わる ---- */
