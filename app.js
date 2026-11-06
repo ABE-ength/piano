@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.2.0';
+const VERSION = '2.3.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -299,7 +299,6 @@ SONGS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
 /* ================= うたの進め方 ================= */
 const star = document.createElement('div'); star.className = 'star hidden'; star.textContent = '⭐'; fx.appendChild(star);
-const pips = document.createElement('div'); pips.className = 'pips hidden'; fx.appendChild(pips);
 const hand = document.createElement('div'); hand.className = 'hand hidden'; hand.textContent = '👇'; fx.appendChild(hand);
 const ripple = document.createElement('div'); ripple.className = 'ripple hidden'; fx.appendChild(ripple);
 
@@ -331,21 +330,21 @@ const song = {
     $('#songBtn').classList.remove('hidden'); $('#stopBtn').classList.add('hidden');
   },
   light(m, count = 0, total = count) {
-    if (this.lit != null && this.lit !== m) keyEls.get(this.lit)?.classList.remove('target');
+    if (this.lit != null && this.lit !== m) keyEls.get(this.lit)?.classList.remove('target', 't0', 't1', 't2', 't3', 'flash');
     this.lit = m;
-    if (m == null) { star.classList.add('hidden'); pips.classList.add('hidden'); return; }
+    if (m == null) { star.classList.add('hidden'); return; }
     keyEls.get(m)?.classList.add('target');
     const p = keyPos(m);
     star.style.left = p.x + 'px'; star.style.top = p.top + 'px';
     star.classList.remove('hidden');
-    // 同じ鍵盤を続けて押すときは、押す回数ぶんの丸を表示
-    if (total >= 2) {
-      // ● = あと押す回数、○ = もう押した回数
-      pips.innerHTML = total > 4 ? `<b>×${count}</b>` : '<i class="done"></i>'.repeat(total - count) + '<i></i>'.repeat(count);
-      pips.style.left = p.x + 'px'; pips.style.top = (p.top + p.h * 0.5) + 'px';
-      pips.classList.remove('hidden');
-      pips.classList.remove('pulse'); void pips.offsetWidth; pips.classList.add('pulse');
-    } else pips.classList.add('hidden');
+    // 同じ鍵盤を続けて押すときは、2回目・3回目…で鍵盤の色を変えて知らせる
+    const el = keyEls.get(m);
+    if (el) {
+      const n = Math.max(0, total - count) % 4;      // もう押した回数
+      el.classList.remove('t0', 't1', 't2', 't3', 'flash');
+      el.classList.add('t' + n);
+      if (n > 0) { void el.offsetWidth; el.classList.add('flash'); }
+    }
   },
   // まってねモード：次に押す鍵盤を光らせる
   showTarget() {
@@ -354,9 +353,6 @@ const song = {
     const again = this.lit === m && this.runTotal > 1;
     if (!again) this.runTotal = run;
     this.light(m, run, this.runTotal);
-    if (again) {              // 同じ鍵盤がもう一回：星がぴょんとはねて知らせる
-      star.classList.remove('again'); void star.offsetWidth; star.classList.add('again');
-    }
     this.startHint();
   },
   // しばらく押せないときの案内

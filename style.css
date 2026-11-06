@@ -101,7 +101,7 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 .key.target { animation: glow .9s ease-in-out infinite; z-index: 3; }
 .white.target { background: linear-gradient(#fff7c2, #ffe86a); }
 .black.target { background: linear-gradient(#ffe86a, #ffc928); }
-@keyframes glow { 0%,100% { box-shadow: 0 0 0 4px #ffd84d, 0 0 18px 6px rgba(255,216,77,.9); } 50% { box-shadow: 0 0 0 6px #ffb800, 0 0 30px 14px rgba(255,200,0,.9); } }
+@keyframes glow { 0%,100% { box-shadow: 0 0 0 4px var(--g1), 0 0 18px 6px var(--g3); } 50% { box-shadow: 0 0 0 6px var(--g2), 0 0 30px 14px var(--g3); } }
 .star {
   position: absolute; font-size: 40px; transform: translate(-50%, -100%); z-index: 5;
   animation: bob .6s ease-in-out infinite alternate; filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
@@ -196,16 +196,19 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 .compact .flag { width: 38px; height: 38px; }
 .narrow #buddy { display: none; }
 
-/* ---- まってね：同じ鍵盤を続けて押す回数 ---- */
-.pips { position: absolute; transform: translate(-50%, -50%); z-index: 6; display: flex; gap: 6px; padding: 6px 8px;
-  background: rgba(255,255,255,.92); border-radius: 999px; box-shadow: 0 3px 0 rgba(0,0,0,.15); pointer-events: none; }
-.pips i { width: 22px; height: 22px; border-radius: 50%; background: #ff6f9f; box-shadow: inset 0 -3px 0 rgba(0,0,0,.15); }
-.pips i.done { background: #fff; box-shadow: inset 0 0 0 3px #ffb3cf; }
-.pips b { font-size: 20px; color: #ff6f9f; }
-.pips.pulse { animation: pipsPop .45s cubic-bezier(.2,1.8,.4,1); }
-@keyframes pipsPop { from { transform: translate(-50%,-50%) scale(.4); } to { transform: translate(-50%,-50%) scale(1); } }
-.star.again { animation: starAgain .5s cubic-bezier(.2,1.8,.4,1), bob .6s ease-in-out .5s infinite alternate; }
-@keyframes starAgain { 0% { transform: translate(-50%,-100%) scale(.5) rotate(-40deg); } 100% { transform: translate(-50%,-100%) scale(1); } }
+/* ---- まってね：同じ鍵盤を続けて押すとき、押すたびに色が変わる ---- */
+.key.target { --g1: #ffd84d; --g2: #ffb800; --g3: rgba(255,200,0,.9); }
+.key.target.t1 { --g1: #ff8fc0; --g2: #ff4f9a; --g3: rgba(255,80,160,.85); }
+.key.target.t2 { --g1: #7fd0ff; --g2: #2a9df4; --g3: rgba(40,150,255,.85); }
+.key.target.t3 { --g1: #8fe37a; --g2: #3fbf3a; --g3: rgba(60,190,60,.85); }
+.white.target.t1 { background: linear-gradient(#ffe3f0, #ff9ccb); }
+.white.target.t2 { background: linear-gradient(#e2f4ff, #8fd3ff); }
+.white.target.t3 { background: linear-gradient(#e6fbdf, #9fe88a); }
+.black.target.t1 { background: linear-gradient(#ff9ccb, #ff5ea8); }
+.black.target.t2 { background: linear-gradient(#8fd3ff, #3aa6f5); }
+.black.target.t3 { background: linear-gradient(#9fe88a, #4cc94c); }
+.key.target.flash { animation: flash .35s ease-out, glow .9s ease-in-out .35s infinite; }
+@keyframes flash { 0% { filter: brightness(2) saturate(.3); transform: scaleY(.97); } 100% { filter: none; transform: none; } }
 
 /* ---- まってね：しばらく押せないときの案内 ---- */
 #kb .key { transition: filter .4s; }
