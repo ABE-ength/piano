@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.5.0';
+const VERSION = '2.5.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -538,8 +538,35 @@ setBtn.addEventListener('pointerdown', () => { lp = setTimeout(() => { lp = null
 const cancelLp = () => { if (lp) { clearTimeout(lp); lp = null; toast(T('longpress')); } };
 setBtn.addEventListener('pointerup', cancelLp);
 setBtn.addEventListener('pointerleave', () => { if (lp) { clearTimeout(lp); lp = null; } });
-const vol = $('#volume'); vol.value = S.volume;
-vol.oninput = () => { S.volume = +vol.value; piano.setVolume(S.volume); save(); };
+// 音量：指でつかんだまま左右に動かせる（縦向きで画面を回しているときも正しく動く）
+const volSlider = $('#volSlider');
+function drawVol() {
+  const pct = (S.volume - 0.1) / 0.9 * 100;
+  $('#volFill').style.width = pct + '%'; $('#volKnob').style.left = pct + '%';
+  volSlider.setAttribute('aria-valuenow', Math.round(S.volume * 100));
+}
+let volTest = 0;
+function setVolFrom(e) {
+  const r = volSlider.getBoundingClientRect();
+  const rotated = app.style.transform.includes('rotate');
+  let f = rotated ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;
+  f = Math.max(0, Math.min(1, f));
+  S.volume = Math.round((0.1 + f * 0.9) * 100) / 100;
+  piano.setVolume(S.volume); drawVol();
+  const now = performance.now();
+  if (now - volTest > 350) { volTest = now; piano.unlock(); piano.noteOn(72, 0.5); setTimeout(() => piano.noteOff(72), 250); }
+}
+volSlider.addEventListener('pointerdown', e => {
+  e.preventDefault(); volSlider.setPointerCapture(e.pointerId); volSlider.classList.add('drag'); setVolFrom(e);
+});
+volSlider.addEventListener('pointermove', e => { if (volSlider.hasPointerCapture(e.pointerId)) setVolFrom(e); });
+const volEnd = () => { volSlider.classList.remove('drag'); save(); };
+volSlider.addEventListener('pointerup', volEnd); volSlider.addEventListener('pointercancel', volEnd);
+volSlider.addEventListener('keydown', e => {
+  const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 0.05 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -0.05 : 0;
+  if (d) { S.volume = Math.max(0.1, Math.min(1, S.volume + d)); piano.setVolume(S.volume); drawVol(); save(); }
+});
+drawVol();
 const lab = $('#labels'); lab.checked = S.labels;
 lab.onchange = () => { S.labels = lab.checked; save(); buildKeys(); if (song.lit != null) { const m = song.lit; song.lit = null; song.light(m); } };
 const gd = $('#guide'); gd.checked = S.guide;
