@@ -44,16 +44,16 @@
   <!-- 上の帯 -->
   <header id="top">
     <div class="left">
-      <button id="songBtn" class="pill big">🎵 <span>うた</span></button>
-      <button id="stopBtn" class="pill big red hidden">⏹ <span>やめる</span></button>
+      <button id="songBtn" class="pill big">🎵 <span data-i18n="songs">うた</span></button>
+      <button id="stopBtn" class="pill big red hidden">⏹ <span data-i18n="stop">やめる</span></button>
       <div class="seg" id="modeSeg">
-        <button data-v="wait">⭐ <span>まってね</span></button>
-        <button data-v="along">🎶 <span>いっしょに</span></button>
+        <button data-v="wait">⭐ <span data-i18n="wait">まってね</span></button>
+        <button data-v="along">🎶 <span data-i18n="along">いっしょに</span></button>
       </div>
       <div class="seg small" id="speedSeg">
-        <button data-v="0.7" aria-label="ゆっくり">🐢</button>
-        <button data-v="1" aria-label="ふつう">🚶</button>
-        <button data-v="1.3" aria-label="はやい">🐇</button>
+        <button data-v="0.7" data-i18n-aria="slow" aria-label="ゆっくり">🐢</button>
+        <button data-v="1" data-i18n-aria="normal" aria-label="ふつう">🚶</button>
+        <button data-v="1.3" data-i18n-aria="fast" aria-label="はやい">🐇</button>
       </div>
     </div>
     <div id="now" class="hidden"><span id="nowEmoji"></span><span id="nowTitle"></span><div id="bar"><div id="barFill"></div></div></div>
@@ -70,6 +70,23 @@
           <path d="M51 86 Q60 95 69 86" stroke="#3a2a20" stroke-width="3" fill="none" stroke-linecap="round"/>
           <circle cx="30" cy="78" r="7" fill="#ff9aa8" opacity=".7"/><circle cx="90" cy="78" r="7" fill="#ff9aa8" opacity=".7"/>
         </svg>
+      </div>
+      <div id="flags" role="group" aria-label="ことば / Language">
+        <button class="flag" data-lang="ja" aria-label="にほんご">
+          <svg viewBox="0 0 40 40"><defs><clipPath id="cj"><circle cx="20" cy="20" r="18"/></clipPath></defs>
+            <g clip-path="url(#cj)"><rect width="40" height="40" fill="#fff"/><circle cx="20" cy="20" r="8" fill="#e8384f"/></g>
+            <circle cx="20" cy="20" r="18" fill="none" stroke="#f1d9de" stroke-width="2"/>
+            <circle cx="11" cy="11" r="3" fill="#fff" opacity=".9"/></svg>
+        </button>
+        <button class="flag" data-lang="en" aria-label="English">
+          <svg viewBox="0 0 40 40"><defs><clipPath id="ce"><circle cx="20" cy="20" r="18"/></clipPath></defs>
+            <g clip-path="url(#ce)"><rect width="40" height="40" fill="#fff"/>
+              <g fill="#e8384f"><rect y="2" width="40" height="4"/><rect y="10" width="40" height="4"/><rect y="18" width="40" height="4"/><rect y="26" width="40" height="4"/><rect y="34" width="40" height="4"/></g>
+              <rect width="20" height="22" fill="#3c5bd6"/>
+              <g fill="#fff"><circle cx="5" cy="5" r="1.4"/><circle cx="11" cy="5" r="1.4"/><circle cx="17" cy="5" r="1.4"/><circle cx="8" cy="10" r="1.4"/><circle cx="14" cy="10" r="1.4"/><circle cx="5" cy="15" r="1.4"/><circle cx="11" cy="15" r="1.4"/><circle cx="17" cy="15" r="1.4"/></g></g>
+            <circle cx="20" cy="20" r="18" fill="none" stroke="#dfe4f5" stroke-width="2"/>
+            <circle cx="28" cy="10" r="2.5" fill="#fff" opacity=".8"/></svg>
+        </button>
       </div>
       <button id="setBtn" class="pill" aria-label="せってい（ながおし）">⚙</button>
     </div>
@@ -92,7 +109,7 @@
   <!-- うたをえらぶ -->
   <div id="picker" class="overlay hidden">
     <div class="panel">
-      <h2>🎵 どの うたに する？</h2>
+      <h2 data-i18n="pick">🎵 どの うたに する？</h2>
       <div id="songGrid"></div>
       <button class="close pill" data-close>✕</button>
     </div>
@@ -102,11 +119,11 @@
   <div id="done" class="overlay hidden">
     <div class="panel done">
       <div class="hooray">🎉</div>
-      <h2>じょうず！</h2>
+      <h2 data-i18n="great">じょうず！</h2>
       <div class="row">
-        <button id="againBtn" class="pill big">🔁 <span>もういちど</span></button>
-        <button id="otherBtn" class="pill big">🎵 <span>ほかの うた</span></button>
-        <button class="pill big" data-close>🎹 <span>じゆうに ひく</span></button>
+        <button id="againBtn" class="pill big">🔁 <span data-i18n="again">もういちど</span></button>
+        <button id="otherBtn" class="pill big">🎵 <span data-i18n="other">ほかの うた</span></button>
+        <button class="pill big" data-close>🎹 <span data-i18n="free">じゆうに ひく</span></button>
       </div>
     </div>
     <div id="confetti"></div>
@@ -115,17 +132,17 @@
   <!-- おとな用のせってい（⚙をながおし） -->
   <div id="settings" class="overlay hidden">
     <div class="panel sheet">
-      <h2>せってい（おとなよう）</h2>
-      <label class="line"><span>音量</span><input id="volume" type="range" min="0.1" max="1" step="0.05"></label>
-      <label class="line"><span>鍵盤に ドレミ を表示</span><input id="labels" type="checkbox"></label>
-      <label class="line"><span>「いっしょに」でお手本の音を鳴らす</span><input id="guide" type="checkbox"></label>
-      <p class="note">⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。</p>
-      <p class="credit">ピアノの音：Salamander Grand Piano V3（Alexander Holm, CC BY 3.0）<br>ピアノ v<span id="ver"></span></p>
-      <button class="pill big" data-close>とじる</button>
+      <h2 data-i18n="settings">せってい（おとなよう）</h2>
+      <label class="line"><span data-i18n="volume">音量</span><input id="volume" type="range" min="0.1" max="1" step="0.05"></label>
+      <label class="line"><span data-i18n="labels">鍵盤に ドレミ を表示</span><input id="labels" type="checkbox"></label>
+      <label class="line"><span data-i18n="guide">「いっしょに」でお手本の音を鳴らす</span><input id="guide" type="checkbox"></label>
+      <p class="note" data-i18n-html="help"></p>
+      <p class="credit"><span data-i18n="soundby">ピアノの音</span>：Salamander Grand Piano V3（Alexander Holm, CC BY 3.0）<br>ピアノ v<span id="ver"></span></p>
+      <button class="pill big" data-close data-i18n="close">とじる</button>
     </div>
   </div>
 
-  <div id="loading"><div>🎹</div><p>じゅんび ちゅう…</p></div>
+  <div id="loading"><div>🎹</div><p data-i18n="loading">じゅんび ちゅう…</p></div>
   <div id="toast"></div>
 </div>
 <script src="app.js"></script>

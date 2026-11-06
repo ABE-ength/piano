@@ -1,12 +1,49 @@
 'use strict';
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
 /* ================= せってい ================= */
-const S = { mode: 'wait', speed: 1, volume: 0.85, labels: true, guide: true };
+const S = { mode: 'wait', speed: 1, volume: 0.85, labels: true, guide: true,
+  lang: (navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en' };
 try { Object.assign(S, JSON.parse(localStorage.getItem('piano2.settings') || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem('piano2.settings', JSON.stringify(S)); } catch (e) {} };
+
+/* ================= ことば（日本語・英語） ================= */
+const TEXT = {
+  ja: {
+    songs: 'うた', stop: 'やめる', wait: 'まってね', along: 'いっしょに',
+    slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい',
+    pick: '🎵 どの うたに する？', great: 'じょうず！', again: 'もういちど', other: 'ほかの うた', free: 'じゆうに ひく',
+    settings: 'せってい（おとなよう）', volume: '音量', labels: '鍵盤に ドレミ を表示',
+    guide: '「いっしょに」でお手本の音を鳴らす', close: 'とじる', soundby: 'ピアノの音',
+    help: '⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。<br>🇯🇵🇺🇸 右上の国旗で、ことばを切り替えられます。',
+    loading: 'じゅんび ちゅう…', loadErr: 'よみこめませんでした。ネットにつないで ひらきなおしてね',
+    longpress: 'おとなの人は ながおし してね',
+    notes: ['ド', 'ド', 'レ', 'レ', 'ミ', 'ファ', 'ファ', 'ソ', 'ソ', 'ラ', 'ラ', 'シ'],
+  },
+  en: {
+    songs: 'Songs', stop: 'Stop', wait: 'Wait for me', along: 'Play along',
+    slow: 'Slow', normal: 'Normal', fast: 'Fast',
+    pick: '🎵 Pick a song!', great: 'Great job!', again: 'Again', other: 'Other songs', free: 'Free play',
+    settings: 'Settings (for grown-ups)', volume: 'Volume', labels: 'Show note names on keys',
+    guide: 'Play the melody in “Play along”', close: 'Close', soundby: 'Piano sound',
+    help: '⭐ Wait for me: the song moves on when the glowing key is pressed.<br>🎶 Play along: keys light up with the music. Change the speed with 🐢🚶🐇.<br>🇯🇵🇺🇸 Tap a flag (top right) to change the language.',
+    loading: 'Getting ready…', loadErr: 'Could not load. Please connect to the internet and reopen.',
+    longpress: 'Grown-ups: press and hold',
+    notes: ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'],
+  },
+};
+const T = k => TEXT[S.lang][k];
+function applyLang() {
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = T(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
+  document.querySelectorAll('.flag').forEach(f => f.classList.toggle('sel', f.dataset.lang === S.lang));
+  document.title = S.lang === 'ja' ? 'ピアノ' : 'Piano';
+}
+applyLang();
 
 /* ================= 横画面にする ================= */
 // 縦向きで開いても、画面全体を90度回して横画面のレイアウトで表示する
@@ -26,7 +63,6 @@ function tryLockLandscape() {
 
 /* ================= 音名・色 ================= */
 const isBlack = m => [1, 3, 6, 8, 10].includes(m % 12);
-const JA = ['ド', 'ド', 'レ', 'レ', 'ミ', 'ファ', 'ファ', 'ソ', 'ソ', 'ラ', 'ラ', 'シ'];
 const COLOR = ['#ff5a5a', '#ff7a45', '#ff9f1c', '#f4b400', '#f2c200', '#4cc94c', '#2fbf9a', '#29b6f6', '#3d8bff', '#5c6bff', '#8e6bff', '#c45cff'];
 const LOW = 60, HIGH = 76;                       // ド(C4)〜ミ(E5)
 
@@ -94,7 +130,7 @@ class Piano {
 }
 const piano = new Piano();
 piano.load().then(() => $('#loading').classList.add('gone'))
-  .catch(() => { $('#loading p').textContent = 'よみこめませんでした。ネットにつないで ひらきなおしてね'; });
+  .catch(() => { $('#loading p').textContent = T('loadErr'); });
 setTimeout(() => $('#loading').classList.add('gone'), 8000);   // 念のため
 
 /* ================= 鍵盤 ================= */
@@ -109,7 +145,7 @@ function buildKeys() {
     const el = document.createElement('div');
     el.className = 'key white'; el.dataset.m = m;
     el.style.left = i * w + '%'; el.style.width = w + '%'; el.style.setProperty('--c', COLOR[m % 12]);
-    el.innerHTML = `<div class="tab">${JA[m % 12]}</div>`;
+    el.innerHTML = `<div class="tab">${T('notes')[m % 12]}</div>`;
     if (i === 0) el.style.borderLeft = '0';
     kb.appendChild(el); keyEls.set(m, el);
     if (i < whites.length - 1 && isBlack(m + 1)) {
@@ -192,26 +228,38 @@ document.addEventListener('pointerdown', () => piano.unlock(), { capture: true }
 /* ================= うた（10曲） ================= */
 // 音名:拍（拍を省くと1拍）。著作権の切れた曲・昔からの歌のメロディです。
 const SONGS = [
-  { id: 'kira', e: '⭐', t: 'きらきらぼし', b: '#fff3b8', bpm: 100,
+  { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', b: '#fff3b8', bpm: 100,
     n: 'C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2' },
-  { id: 'kaeru', e: '🐸', t: 'かえるのうた', b: '#d6f5c9', bpm: 110,
-    n: 'C4 D4 E4 F4 E4 D4 C4:2 E4 F4 G4 A4 G4 F4 E4:2 C4:2 C4:2 C4:2 C4:2 C4:.5 C4:.5 D4:.5 D4:.5 E4:.5 E4:.5 F4:.5 F4:.5 E4 D4 C4:2' },
-  { id: 'mary', e: '🐑', t: 'メリーさんのひつじ', b: '#f3ecff', bpm: 110,
-    n: 'E4:1.5 D4:.5 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4:1.5 D4:.5 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4' },
-  { id: 'chou', e: '🦋', t: 'ちょうちょう', b: '#ffe0ef', bpm: 110,
-    n: 'G4 E4 E4:2 F4 D4 D4:2 C4 D4 E4 F4 G4 G4 G4:2 G4 E4 E4 E4 F4 D4 D4 D4 C4 E4 G4 G4 E4 E4 E4:2 D4 D4 D4 D4 D4 E4 F4:2 E4 E4 E4 E4 E4 F4 G4:2 G4 E4 E4:2 F4 D4 D4:2 C4 E4 G4 G4 C4:4' },
-  { id: 'london', e: '🌉', t: 'ロンドンばし', b: '#e0f1ff', bpm: 110,
-    n: 'G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4 E4 F4:2 E4 F4 G4:2 G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4:2 G4:2 E4 C4:3' },
-  { id: 'joy', e: '🎵', t: 'よろこびのうた', b: '#fff0d6', bpm: 110,
-    n: 'E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4:1.5 D4:.5 D4:2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4:1.5 C4:.5 C4:2' },
-  { id: 'jingle', e: '🔔', t: 'ジングルベル', b: '#ffdcdc', bpm: 130,
-    n: 'E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4:1.5 F4:.5 F4 E4 E4 E4:.5 E4:.5 E4 D4 D4 E4 D4:2 G4:2 E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4 F4 F4 E4 E4 E4:.5 E4:.5 G4 G4 F4 D4 C4:4' },
-  { id: 'birthday', e: '🎂', t: 'ハッピーバースデー', b: '#ffe8c2', bpm: 100,
+  { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', b: '#ffe8c2', bpm: 100,
     n: 'C4:.75 C4:.25 D4 C4 F4 E4:2 C4:.75 C4:.25 D4 C4 G4 F4:2 C4:.75 C4:.25 C5 A4 F4 E4 D4 Bb4:.75 Bb4:.25 A4 F4 G4 F4:3' },
-  { id: 'farm', e: '🐮', t: 'ゆかいな まきば', b: '#e9f7d4', bpm: 120,
+  { id: 'kaeru', e: '🐸', ja: 'かえるのうた', en: 'Frog Song', b: '#d6f5c9', bpm: 110,
+    n: 'C4 D4 E4 F4 E4 D4 C4:2 E4 F4 G4 A4 G4 F4 E4:2 C4:2 C4:2 C4:2 C4:2 C4:.5 C4:.5 D4:.5 D4:.5 E4:.5 E4:.5 F4:.5 F4:.5 E4 D4 C4:2' },
+  { id: 'chou', e: '🦋', ja: 'ちょうちょう', en: 'Lightly Row', b: '#ffe0ef', bpm: 110,
+    n: 'G4 E4 E4:2 F4 D4 D4:2 C4 D4 E4 F4 G4 G4 G4:2 G4 E4 E4 E4 F4 D4 D4 D4 C4 E4 G4 G4 E4 E4 E4:2 D4 D4 D4 D4 D4 E4 F4:2 E4 E4 E4 E4 E4 F4 G4:2 G4 E4 E4:2 F4 D4 D4:2 C4 E4 G4 G4 C4:4' },
+  { id: 'mary', e: '🐑', ja: 'メリーさんのひつじ', en: 'Mary Had a Little Lamb', b: '#f3ecff', bpm: 110,
+    n: 'E4:1.5 D4:.5 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4:1.5 D4:.5 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4' },
+  { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', b: '#e9f7d4', bpm: 120,
     n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
-  { id: 'row', e: '⛵', t: 'こげこげボート', b: '#d9f4ff', bpm: 110,
+  { id: 'alps', e: '🏔️', ja: 'アルプスいちまんじゃく', en: 'Yankee Doodle', b: '#e3f0ff', bpm: 150,
+    n: 'F4 F4 G4 A4 F4 A4 G4 C4 F4 F4 G4 A4 F4:2 E4:2 F4 F4 G4 A4 Bb4 A4 G4 F4 E4 C4 D4 E4 F4:2 F4:2' },
+  { id: 'jingle', e: '🔔', ja: 'ジングルベル', en: 'Jingle Bells', b: '#ffdcdc', bpm: 130,
+    n: 'E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4:1.5 F4:.5 F4 E4 E4 E4:.5 E4:.5 E4 D4 D4 E4 D4:2 G4:2 E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4 F4 F4 E4 E4 E4:.5 E4:.5 G4 G4 F4 D4 C4:4' },
+  { id: 'london', e: '🌉', ja: 'ロンドンばし', en: 'London Bridge', b: '#e0f1ff', bpm: 110,
+    n: 'G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4 E4 F4:2 E4 F4 G4:2 G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4:2 G4:2 E4 C4:3' },
+  { id: 'spider', e: '🕷️', ja: 'ちいさなクモさん', en: 'Itsy Bitsy Spider', b: '#eaf4ff', bpm: 110,
+    n: 'C4:.5 F4 F4:.5 F4 G4:.5 A4:1.5 A4 A4:.5 G4 F4:.5 G4 A4:.5 F4:3 A4:1.5 A4 Bb4:.5 C5:3 C5 Bb4:.5 A4 Bb4:.5 C5:1.5 A4:3 F4:1.5 F4 G4:.5 A4:3 A4 G4:.5 F4 G4:.5 A4:1.5 F4:3 C4:.5 C4:.5 F4 F4:.5 F4 G4:.5 A4:1.5 A4 A4:.5 G4 F4:.5 G4 A4:.5 F4:3' },
+  { id: 'frere', e: '😴', ja: 'フレール・ジャック', en: 'Frère Jacques', b: '#fff0f6', bpm: 110,
+    n: 'F4 G4 A4 F4 F4 G4 A4 F4 A4 Bb4 C5:2 A4 Bb4 C5:2 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 F4 C4 F4:2 F4 C4 F4:2' },
+  { id: 'row', e: '⛵', ja: 'こげこげボート', en: 'Row Your Boat', b: '#d9f4ff', bpm: 110,
     n: 'C4:1.5 C4:1.5 C4 D4:.5 E4:1.5 E4 D4:.5 E4 F4:.5 G4:3 C5:.5 C5:.5 C5:.5 G4:.5 G4:.5 G4:.5 E4:.5 E4:.5 E4:.5 C4:.5 C4:.5 C4:.5 G4 F4:.5 E4 D4:.5 C4:3' },
+  { id: 'hotcross', e: '🥐', ja: 'ホットクロスバン', en: 'Hot Cross Buns', b: '#fff1dc', bpm: 110,
+    n: 'E4 D4 C4:2 E4 D4 C4:2 C4:.5 C4:.5 C4:.5 C4:.5 D4:.5 D4:.5 D4:.5 D4:.5 E4 D4 C4:2' },
+  { id: 'joy', e: '🎵', ja: 'よろこびのうた', en: 'Ode to Joy', b: '#fff0d6', bpm: 110,
+    n: 'E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4:1.5 D4:.5 D4:2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4:1.5 C4:.5 C4:2' },
+  { id: 'lullaby', e: '🌙', ja: 'ブラームスのこもりうた', en: "Brahms' Lullaby", b: '#e6e6ff', bpm: 90,
+    n: 'E4:.5 E4:.5 G4:2 E4:.5 E4:.5 G4:2 E4:.5 G4:.5 C5 B4:1.5 A4:.5 A4 G4 D4:.5 E4:.5 F4 D4 D4:.5 E4:.5 F4:2 D4:.5 F4:.5 B4:.5 A4:.5 G4 B4 C5:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4 G4 A4 G4:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4 E4:.5 D4:.5 C4:3' },
+  { id: 'elise', e: '🎹', ja: 'エリーゼのために', en: 'Für Elise', b: '#f6eaff', bpm: 100,
+    n: 'E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 G#4:.5 B4:.5 C5:1.5 E4:.5 E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 C5:.5 B4:.5 A4:3' },
 ];
 const NAME = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 function parse(str) {
@@ -232,7 +280,7 @@ const song = {
     this.stop(true);
     this.cur = s; this.idx = 0;
     $('#now').classList.remove('hidden');
-    $('#nowEmoji').textContent = s.e; $('#nowTitle').textContent = s.t;
+    $('#nowEmoji').textContent = s.e; $('#nowTitle').textContent = s[S.lang];
     $('#songBtn').classList.add('hidden'); $('#stopBtn').classList.remove('hidden');
     this.progress();
     if (S.mode === 'wait') this.light(s.notes[0].m);
@@ -316,12 +364,27 @@ document.querySelectorAll('[data-close]').forEach(b => b.onclick = hideAll);
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o && performance.now() - shownAt > 500) hideAll(); }));
 
 const grid = $('#songGrid');
-SONGS.forEach(s => {
-  const b = document.createElement('button');
-  b.className = 'song'; b.style.setProperty('--b', s.b);
-  b.innerHTML = `<span class="e">${s.e}</span><span>${s.t}</span>`;
-  b.onclick = () => { piano.unlock(); hideAll(); song.start(s); };
-  grid.appendChild(b);
+function buildGrid() {
+  grid.innerHTML = '';
+  SONGS.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'song'; b.style.setProperty('--b', s.b);
+    b.innerHTML = `<span class="e">${s.e}</span><span class="t"></span>`;
+    b.querySelector('.t').textContent = s[S.lang];
+    b.onclick = () => { piano.unlock(); hideAll(); song.start(s); };
+    grid.appendChild(b);
+  });
+}
+buildGrid();
+
+// 国旗でことばを切り替える
+document.querySelectorAll('.flag').forEach(f => f.onclick = () => {
+  if (S.lang === f.dataset.lang) return;
+  S.lang = f.dataset.lang; save();
+  applyLang(); buildGrid(); buildKeys();
+  if (song.lit != null) { const m = song.lit; song.lit = null; song.light(m); }
+  if (song.cur) $('#nowTitle').textContent = song.cur[S.lang];
+  piano.unlock(); piano.noteOn(S.lang === 'ja' ? 72 : 67, 0.6);
 });
 $('#songBtn').onclick = () => { piano.unlock(); show('#picker'); };
 $('#stopBtn').onclick = () => song.stop();
@@ -346,7 +409,7 @@ $('#speedSeg').classList.toggle('hidden', S.mode !== 'along');
 let lp = null;
 const setBtn = $('#setBtn');
 setBtn.addEventListener('pointerdown', () => { lp = setTimeout(() => { lp = null; show('#settings'); }, 800); });
-const cancelLp = () => { if (lp) { clearTimeout(lp); lp = null; toast('おとなの人は ながおし してね'); } };
+const cancelLp = () => { if (lp) { clearTimeout(lp); lp = null; toast(T('longpress')); } };
 setBtn.addEventListener('pointerup', cancelLp);
 setBtn.addEventListener('pointerleave', () => { if (lp) { clearTimeout(lp); lp = null; } });
 const vol = $('#volume'); vol.value = S.volume;
