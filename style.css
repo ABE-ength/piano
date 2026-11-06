@@ -55,8 +55,28 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 }
 #nowEmoji { font-size: 26px; }
 #nowTitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-#bar { flex-basis: 100%; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
-#barFill { height: 100%; width: 0; background: linear-gradient(90deg, #ff9ec7, #ffd84d); transition: width .2s; }
+/* ---- 曲の進み具合（光るゲージ） ---- */
+#bar { flex-basis: 100%; position: relative; height: 16px; margin: 4px 26px 2px 0; background: #fbeaf3;
+  border-radius: 8px; box-shadow: inset 0 2px 3px rgba(0,0,0,.12); }
+#barFill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(90deg, #ff6f9f, #ffb347, #ffd84d, #7ed957, #4fc3f7, #9575cd, #ff6f9f);
+  background-size: 300% 100%; animation: rainbow 3s linear infinite;
+  box-shadow: 0 0 8px 2px rgba(255,210,60,.85); transition: width .35s cubic-bezier(.3,1.4,.5,1); }
+#barFill::after { content: ''; position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.75) 45%, transparent 60%);
+  background-size: 200% 100%; animation: shine 1.4s linear infinite; }
+@keyframes rainbow { to { background-position: 300% 0; } }
+@keyframes shine { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+#bar.bump #barFill { animation: rainbow 3s linear infinite, barGlow .5s ease-out; }
+@keyframes barGlow { 0% { box-shadow: 0 0 18px 8px rgba(255,240,120,1); } 100% { box-shadow: 0 0 8px 2px rgba(255,210,60,.85); } }
+#barRunner { position: absolute; top: 50%; left: 0; font-size: 26px; line-height: 1; transform: translate(-50%, -58%);
+  transition: left .35s cubic-bezier(.3,1.4,.5,1); filter: drop-shadow(0 2px 2px rgba(0,0,0,.25)); z-index: 2; }
+#bar.bump #barRunner { animation: runHop .4s ease-out; }
+@keyframes runHop { 40% { transform: translate(-50%, -105%) rotate(-10deg); } }
+#barGoal { position: absolute; right: -26px; top: 50%; transform: translateY(-55%); font-size: 20px; }
+#bar.near #barGoal { animation: bob .4s ease-in-out infinite alternate; }
+.compact #bar { height: 13px; }
+.compact #barRunner { font-size: 22px; }
 
 #buddy { width: 70px; height: 70px; }
 #buddy svg { width: 100%; height: 100%; }

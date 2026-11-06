@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.3.0';
+const VERSION = '2.4.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -375,7 +375,14 @@ const song = {
     kb.classList.remove('hinting');
     hand.classList.add('hidden'); ripple.classList.add('hidden');
   },
-  progress() { $('#barFill').style.width = (this.cur ? this.idx / this.cur.notes.length * 100 : 0) + '%'; },
+  progress() {
+    const pct = this.cur ? this.idx / this.cur.notes.length * 100 : 0;
+    $('#barFill').style.width = pct + '%';
+    const r = $('#barRunner'); r.style.left = pct + '%'; r.textContent = this.cur ? this.cur.e : '';
+    const bar = $('#bar');
+    if (pct > 0) { bar.classList.remove('bump'); void bar.offsetWidth; bar.classList.add('bump'); }
+    bar.classList.toggle('near', pct >= 75);
+  },
   onPress(m) {
     if (!this.cur || S.mode !== 'wait') return;
     if (m !== this.cur.notes[this.idx].m) return;
