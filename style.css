@@ -1,0 +1,108 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: #1b1b1f; color: #eee;
+  font-family: system-ui, -apple-system, "Noto Sans JP", sans-serif;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+body { display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); }
+
+/* ---- top bar ---- */
+#bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 6px; padding: 5px 8px; background: #26262c; border-bottom: 3px solid #e85d4a;
+}
+.grp { display: flex; align-items: center; gap: 4px; }
+.btn {
+  min-width: 40px; height: 36px; padding: 0 10px; border: 0; border-radius: 9px;
+  background: #3a3a43; color: #f2f2f2; font-size: 15px; font-family: inherit;
+  touch-action: manipulation;
+}
+.btn:active { background: #50505b; }
+.btn.wide { min-width: 66px; }
+.btn.on { background: #e85d4a; color: #fff; }
+#rec.on { animation: blink 1s infinite; }
+@keyframes blink { 50% { background: #a33b2c; } }
+.range { min-width: 66px; text-align: center; font-size: 14px; color: #ddd; font-variant-numeric: tabular-nums; }
+.lbl { font-size: 13px; color: #aaa; }
+
+/* ---- range map ---- */
+#mapWrap { position: relative; height: 20px; background: #111; touch-action: none; }
+#map { width: 100%; height: 100%; display: block; }
+#mapWin {
+  position: absolute; top: 0; bottom: 0; border: 2px solid #e85d4a; border-radius: 3px;
+  background: rgba(232, 93, 74, .18); pointer-events: none;
+}
+
+/* ---- keyboard ---- */
+#kb { position: relative; flex: 1; touch-action: none; background: #111; overflow: hidden; }
+.key { position: absolute; top: 0; }
+.white {
+  height: 100%; background: linear-gradient(#f4f2ec, #fffefa 85%, #e7e4dc);
+  border: 1px solid #999; border-top: 0; border-radius: 0 0 7px 7px;
+  box-shadow: inset 0 -6px 0 #d8d4ca;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  padding-bottom: 12px; color: #777; font-size: 1em; line-height: 1.15;
+}
+.white.down, .white.playing { background: linear-gradient(#cfe4ff, #b9d7ff); box-shadow: inset 0 -2px 0 #9cc2f2; }
+.white .oct { font-size: .72em; color: #999; }
+.white.c { color: #c0392b; font-weight: 600; }
+.black {
+  height: 62%; z-index: 2; border-radius: 0 0 5px 5px;
+  background: linear-gradient(#2c2c30, #111 90%); border: 1px solid #000; border-top: 0;
+  box-shadow: inset 0 -5px 0 #3b3b40, 0 2px 3px rgba(0,0,0,.5);
+}
+.black.down, .black.playing { background: linear-gradient(#24507f, #1b3c63); box-shadow: inset 0 -2px 0 #2f6aa8; }
+
+/* ---- hint / toast ---- */
+.hint {
+  position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 20;
+  background: rgba(30,30,36,.95); border: 1px solid #555; border-radius: 12px;
+  padding: 10px 12px; font-size: 14px; width: max-content; max-width: 92vw;
+}
+.hint button { margin-left: 8px; background: none; border: 0; color: #ccc; font-size: 18px; }
+.hidden { display: none !important; }
+#toast {
+  position: fixed; left: 50%; top: 60px; transform: translateX(-50%); z-index: 50;
+  background: #333; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px;
+  opacity: 0; transition: opacity .25s; pointer-events: none;
+}
+#toast.show { opacity: 1; }
+
+/* ---- sheets ---- */
+#sheetBg { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 30; }
+.sheet {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 31;
+  width: min(560px, 100vw); max-height: 85vh; overflow-y: auto;
+  background: #26262c; border-radius: 16px 16px 0 0; padding: 14px 18px calc(18px + env(safe-area-inset-bottom));
+  user-select: text;
+}
+.sheet h2 { margin: 0 0 10px; font-size: 17px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #34343c; font-size: 15px; }
+.seg { display: flex; border-radius: 9px; overflow: hidden; }
+.seg button { border: 0; padding: 8px 12px; background: #3a3a43; color: #ddd; font-size: 14px; font-family: inherit; }
+.seg button.sel { background: #e85d4a; color: #fff; }
+input[type=range] { width: 50%; accent-color: #e85d4a; }
+.sw { width: 22px; height: 22px; accent-color: #e85d4a; }
+.ver { color: #888; font-size: 12px; margin: 12px 0 0; }
+
+#recList { list-style: none; margin: 0; padding: 0; }
+#recList li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #34343c; }
+#recList .name { flex: 1; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#recList .dur { color: #999; font-size: 13px; }
+#recList .btn { height: 34px; min-width: 38px; font-size: 14px; }
+#recList .empty { color: #999; justify-content: center; border: 0; }
+
+/* portrait phones: compact bar */
+@media (max-width: 600px) {
+  .btn { height: 34px; min-width: 36px; padding: 0 8px; font-size: 14px; }
+  .btn.wide { min-width: 58px; }
+  .lbl { display: none; }
+}
+
+/* 縦向き：鍵盤は下の60%に（長すぎる鍵を避ける） */
+@media (orientation: portrait) {
+  #kb { flex: 0 0 auto; height: 60vh; margin-top: auto; }
+  body { background: #1b1b1f; }
+}
