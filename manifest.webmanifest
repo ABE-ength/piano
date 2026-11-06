@@ -2,13 +2,13 @@
   "id": "./piano-app",
   "name": "ピアノ",
   "short_name": "ピアノ",
-  "description": "スマホで弾けるピアノ",
+  "description": "小さな子どもが遊べるピアノ",
   "lang": "ja",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#1b1b1f",
-  "theme_color": "#1b1b1f",
+  "background_color": "#6ccaff",
+  "theme_color": "#7fd3ff",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -26,5 +26,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "orientation": "landscape"
 }

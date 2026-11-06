@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#1b1b1f">
+<meta name="theme-color" content="#7fd3ff">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
@@ -12,62 +12,122 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header id="bar">
-  <div class="grp">
-    <button id="octDown" class="btn" aria-label="低い音へ">◀</button>
-    <span id="range" class="range">C3–C5</span>
-    <button id="octUp" class="btn" aria-label="高い音へ">▶</button>
-  </div>
-  <div class="grp">
-    <button id="keysLess" class="btn" aria-label="鍵盤を減らす">−</button>
-    <span class="lbl">鍵盤</span>
-    <button id="keysMore" class="btn" aria-label="鍵盤を増やす">＋</button>
-  </div>
-  <button id="pedal" class="btn wide" aria-pressed="false">ペダル</button>
-  <div class="grp">
-    <button id="rec" class="btn wide">● 録音</button>
-    <button id="play" class="btn wide">▶ 再生</button>
-    <button id="list" class="btn" aria-label="録音一覧">☰</button>
-  </div>
-  <button id="settings" class="btn" aria-label="設定">⚙</button>
-</header>
+<div id="app">
+  <!-- アニメ風の背景 -->
+  <svg id="scene" viewBox="0 0 1600 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6ccaff"/><stop offset="1" stop-color="#d4f3ff"/>
+      </linearGradient>
+      <radialGradient id="sunG"><stop offset="0" stop-color="#fff2a8"/><stop offset="1" stop-color="#ffcf33"/></radialGradient>
+    </defs>
+    <rect width="1600" height="700" fill="url(#sky)"/>
+    <g opacity=".55" fill="none" stroke-width="26">
+      <circle cx="420" cy="620" r="420" stroke="#ff8a8a"/>
+      <circle cx="420" cy="620" r="394" stroke="#ffc46b"/>
+      <circle cx="420" cy="620" r="368" stroke="#fff27a"/>
+      <circle cx="420" cy="620" r="342" stroke="#9ce88a"/>
+      <circle cx="420" cy="620" r="316" stroke="#8fd0ff"/>
+      <circle cx="420" cy="620" r="290" stroke="#b9a2ff"/>
+    </g>
+    <g class="cloud c1"><circle cx="0" cy="40" r="38"/><circle cx="45" cy="25" r="48"/><circle cx="100" cy="42" r="36"/><rect x="-30" y="40" width="160" height="38" rx="19"/></g>
+    <g class="cloud c2"><circle cx="0" cy="40" r="30"/><circle cx="38" cy="22" r="40"/><circle cx="82" cy="40" r="30"/><rect x="-24" y="38" width="130" height="32" rx="16"/></g>
+    <g class="cloud c3"><circle cx="0" cy="40" r="26"/><circle cx="32" cy="26" r="34"/><circle cx="70" cy="40" r="26"/><rect x="-20" y="38" width="112" height="28" rx="14"/></g>
+    <path d="M0 520 Q300 400 650 500 T1300 470 T1600 480 V700 H0Z" fill="#9be38a"/>
+    <path d="M0 580 Q400 500 800 570 T1600 540 V700 H0Z" fill="#74cf63"/>
+    <g class="flowers">
+      <circle cx="120" cy="560" r="10" fill="#ff7eb6"/><circle cx="260" cy="530" r="9" fill="#fff"/>
+      <circle cx="1350" cy="520" r="10" fill="#ffe14d"/><circle cx="1480" cy="545" r="9" fill="#ff7eb6"/>
+    </g>
+  </svg>
 
-<div id="mapWrap" aria-label="表示する音域（ドラッグで移動）">
-  <canvas id="map"></canvas>
-  <div id="mapWin"></div>
+  <!-- 上の帯 -->
+  <header id="top">
+    <div class="left">
+      <button id="songBtn" class="pill big">🎵 <span>うた</span></button>
+      <button id="stopBtn" class="pill big red hidden">⏹ <span>やめる</span></button>
+      <div class="seg" id="modeSeg">
+        <button data-v="wait">⭐ <span>まってね</span></button>
+        <button data-v="along">🎶 <span>いっしょに</span></button>
+      </div>
+      <div class="seg small" id="speedSeg">
+        <button data-v="0.7" aria-label="ゆっくり">🐢</button>
+        <button data-v="1" aria-label="ふつう">🚶</button>
+        <button data-v="1.3" aria-label="はやい">🐇</button>
+      </div>
+    </div>
+    <div id="now" class="hidden"><span id="nowEmoji"></span><span id="nowTitle"></span><div id="bar"><div id="barFill"></div></div></div>
+    <div class="right">
+      <div id="buddy" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <circle cx="28" cy="30" r="18" fill="#c98b5a"/><circle cx="92" cy="30" r="18" fill="#c98b5a"/>
+          <circle cx="28" cy="30" r="9" fill="#f0c49a"/><circle cx="92" cy="30" r="9" fill="#f0c49a"/>
+          <circle cx="60" cy="66" r="46" fill="#d99a66"/>
+          <ellipse cx="60" cy="82" rx="22" ry="17" fill="#f6dcc0"/>
+          <g class="eyes"><ellipse cx="42" cy="60" rx="6" ry="8" fill="#3a2a20"/><ellipse cx="78" cy="60" rx="6" ry="8" fill="#3a2a20"/>
+          <circle cx="44" cy="57" r="2.2" fill="#fff"/><circle cx="80" cy="57" r="2.2" fill="#fff"/></g>
+          <ellipse cx="60" cy="75" rx="7" ry="5" fill="#3a2a20"/>
+          <path d="M51 86 Q60 95 69 86" stroke="#3a2a20" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="30" cy="78" r="7" fill="#ff9aa8" opacity=".7"/><circle cx="90" cy="78" r="7" fill="#ff9aa8" opacity=".7"/>
+        </svg>
+      </div>
+      <button id="setBtn" class="pill" aria-label="せってい（ながおし）">⚙</button>
+    </div>
+  </header>
+
+  <div id="sun" aria-hidden="true">
+    <svg viewBox="0 0 100 100"><g class="rays" stroke="#ffcf33" stroke-width="6" stroke-linecap="round">
+      <line x1="50" y1="2" x2="50" y2="14"/><line x1="50" y1="86" x2="50" y2="98"/><line x1="2" y1="50" x2="14" y2="50"/><line x1="86" y1="50" x2="98" y2="50"/>
+      <line x1="16" y1="16" x2="24" y2="24"/><line x1="76" y1="76" x2="84" y2="84"/><line x1="84" y1="16" x2="76" y2="24"/><line x1="16" y1="84" x2="24" y2="76"/></g>
+      <circle cx="50" cy="50" r="30" fill="url(#sunG)"/>
+      <circle cx="40" cy="46" r="4" fill="#6b4a1a"/><circle cx="60" cy="46" r="4" fill="#6b4a1a"/>
+      <path d="M40 58 Q50 67 60 58" stroke="#6b4a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="33" cy="56" r="4" fill="#ff9a7a" opacity=".7"/><circle cx="67" cy="56" r="4" fill="#ff9a7a" opacity=".7"/>
+    </svg>
+  </div>
+
+  <!-- 鍵盤 -->
+  <main id="kbWrap"><div id="kb"></div><div id="fx"></div></main>
+
+  <!-- うたをえらぶ -->
+  <div id="picker" class="overlay hidden">
+    <div class="panel">
+      <h2>🎵 どの うたに する？</h2>
+      <div id="songGrid"></div>
+      <button class="close pill" data-close>✕</button>
+    </div>
+  </div>
+
+  <!-- できたね -->
+  <div id="done" class="overlay hidden">
+    <div class="panel done">
+      <div class="hooray">🎉</div>
+      <h2>じょうず！</h2>
+      <div class="row">
+        <button id="againBtn" class="pill big">🔁 <span>もういちど</span></button>
+        <button id="otherBtn" class="pill big">🎵 <span>ほかの うた</span></button>
+        <button class="pill big" data-close>🎹 <span>じゆうに ひく</span></button>
+      </div>
+    </div>
+    <div id="confetti"></div>
+  </div>
+
+  <!-- おとな用のせってい（⚙をながおし） -->
+  <div id="settings" class="overlay hidden">
+    <div class="panel sheet">
+      <h2>せってい（おとなよう）</h2>
+      <label class="line"><span>音量</span><input id="volume" type="range" min="0.1" max="1" step="0.05"></label>
+      <label class="line"><span>鍵盤に ドレミ を表示</span><input id="labels" type="checkbox"></label>
+      <label class="line"><span>「いっしょに」でお手本の音を鳴らす</span><input id="guide" type="checkbox"></label>
+      <p class="note">⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。</p>
+      <p class="credit">ピアノの音：Salamander Grand Piano V3（Alexander Holm, CC BY 3.0）<br>ピアノ v<span id="ver"></span></p>
+      <button class="pill big" data-close>とじる</button>
+    </div>
+  </div>
+
+  <div id="loading"><div>🎹</div><p>じゅんび ちゅう…</p></div>
+  <div id="toast"></div>
 </div>
-
-<main id="kb"></main>
-
-<div id="rotate" class="hint hidden">横向きにすると、鍵盤が広くなって弾きやすくなります <button id="rotateClose" aria-label="閉じる">×</button></div>
-
-<div id="sheetBg" class="hidden"></div>
-
-<section id="setSheet" class="sheet hidden" aria-label="設定">
-  <h2>設定</h2>
-  <div class="row"><span>音名の表示</span>
-    <div class="seg" data-key="labels">
-      <button data-v="doremi">ドレミ</button><button data-v="cde">CDE</button><button data-v="none">なし</button>
-    </div>
-  </div>
-  <div class="row"><span>音色</span>
-    <div class="seg" data-key="timbre">
-      <button data-v="piano">ピアノ</button><button data-v="epiano">エレピ</button><button data-v="organ">オルガン</button>
-    </div>
-  </div>
-  <div class="row"><span>音量</span><input id="volume" type="range" min="0" max="1" step="0.05"></div>
-  <div class="row"><span>響き（ホールの残響）</span><input id="reverb" type="checkbox" class="sw"></div>
-  <div class="row"><span>鍵盤の手前ほど強い音にする</span><input id="velocity" type="checkbox" class="sw"></div>
-  <div class="row"><span>指をすべらせて弾く（グリッサンド）</span><input id="gliss" type="checkbox" class="sw"></div>
-  <p class="ver">ピアノ v<span id="ver"></span></p>
-</section>
-
-<section id="listSheet" class="sheet hidden" aria-label="録音一覧">
-  <h2>録音一覧</h2>
-  <ul id="recList"></ul>
-</section>
-
-<div id="toast"></div>
 <script src="app.js"></script>
 </body>
 </html>
