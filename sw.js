@@ -1,5 +1,5 @@
 // アプリのファイルをスマホに保存して、ネットがなくても開けるようにする
-const CACHE = 'piano-v1.0.1';
+const CACHE = 'piano-v1.0.2';
 const FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'];
 
