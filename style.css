@@ -345,6 +345,6 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 #top .right { justify-content: flex-end; }
 #top .right #now { flex: 1 1 auto; min-width: 120px; max-width: 360px; }
 .playing #flags { display: none; }   /* 曲の間は国旗をかくして、曲名ゲージを広く */
-#buddy { width: 84px; height: 84px; margin: 0 4px; }
-.compact #buddy { width: 72px; height: 72px; }
-.narrow #buddy { width: 72px; height: 72px; }
+#buddy { width: 109px; height: 109px; margin: -8px 4px -14px; }
+.compact #buddy { width: 94px; height: 94px; }
+.narrow #buddy { width: 94px; height: 94px; }

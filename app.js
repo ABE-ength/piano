@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.0.0';
+const VERSION = '3.1.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -261,7 +261,7 @@ document.addEventListener('pointerdown', () => piano.unlock(), { capture: true }
 // 音名:拍（拍を省くと1拍）。著作権の切れた曲・昔からの歌のメロディです。
 const SONGS = [
   { id: 'bear', e: '🐻', ja: 'もりのくまさん', en: 'The Other Day I Met a Bear', zh: '森林裡的熊先生', b: '#f6e3cf', bpm: 120,
-    n: 'G4:.5 F#4:.5 G4 E4:2 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:3 G4:.5 F#4:.5 G4 E4:2 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:4' },
+    n: 'G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:3 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:4' },
   { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', zh: '小星星', b: '#fff3b8', bpm: 100,
     n: 'C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2' },
   { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', zh: '生日快樂', b: '#ffe8c2', bpm: 100,
@@ -491,7 +491,15 @@ function celebrate(s) {
 const sunFx = $('#sunFx');
 // メロディ：[音, 始まり(ms), 長さ(ms), 強さ]。ド(60)〜ミ(76)は鍵盤も光る
 // メロディを鳴らして、鍵盤もいっしょに光らせる
-const STRETCH = 1.5;   // たいよう・くもの伴奏の長さ（1.5倍）
+const STRETCH = 1;
+// リズム譜からメロディを作る：[はじまり(8分音符いくつ目), 音(または和音の配列), 長さ(8分音符), 強さ]
+const EIGHTH = 180;   // 8分音符の長さ(ms)
+function seq(list) {
+  const out = [];
+  list.forEach(([st, ns, ln, v = .5]) => [].concat(ns).forEach(m => out.push([m, st * EIGHTH, ln * EIGHTH, v])));
+  return out;
+}
+const phraseEnd = notes => Math.max(...notes.map(([, d, len]) => d + len)) + 250;
 function playPhrase(notes) {
   notes.forEach(([m, d0, len0, v = .5]) => { const d = d0 * STRETCH, len = len0 * STRETCH; setTimeout(() => {
     piano.noteOn(m, v);
@@ -509,18 +517,25 @@ function sparkleKey(m, ms) {
 /* ================= くまさん（さわると反応） ================= */
 let bearBusy = false, bearLast = -1;
 const BEAR_REACTIONS = [
-  // おどる：たのしいリズム
-  { cls: 'b-dance', ms: 2200, fx: ['🎵', '🎶', '💃', '✨'],
-    notes: [[60, 0, 200], [64, 150, 200], [67, 300, 200], [64, 450, 200], [65, 600, 200], [69, 750, 200], [72, 900, 700, .55], [48, 900, 900, .35], [55, 900, 900, .3]] },
+  // おどる：ブンチャッ ブンチャッ とはずむダンス
+  { cls: 'b-dance', fx: ['🎵', '🎶', '💃', '✨'], notes: seq([
+    [0, 64, 1], [1, 67, 1], [2, 72, 1], [3, 67, 1], [4, 69, 1], [5, 67, 1], [6, 64, 2],
+    [8, 65, 1], [9, 69, 1], [10, 72, 1], [11, 69, 1], [12, 71, 1], [13, 74, 1], [14, 72, 3, .6],
+    [0, 48, 1, .4], [2, [55, 64], 1, .28], [4, 53, 1, .4], [6, [57, 65], 1, .28],
+    [8, 53, 1, .4], [10, [57, 65], 1, .28], [12, 55, 1, .4], [14, [48, 60, 64, 67], 3, .38]]) },
   // てをふる：こんにちは♪
-  { cls: 'b-wave', ms: 1900, fx: ['👋', '💛', '✨'],
-    notes: [[67, 0, 350], [72, 250, 350], [76, 500, 900, .55], [64, 500, 900, .35], [60, 500, 900, .3]] },
-  // ぴょーん：大ジャンプ
-  { cls: 'b-jump', ms: 2000, fx: ['⭐', '💫', '🌟'],
-    notes: [[60, 0, 250], [62, 90, 250], [64, 180, 250], [67, 270, 250], [72, 360, 400], [76, 450, 900, .6], [67, 1000, 300, .45], [72, 1100, 900, .5]] },
+  { cls: 'b-wave', fx: ['👋', '💛', '✨'], notes: seq([
+    [0, 67, 1], [1, 72, 2], [3, 67, 1], [4, 76, 2], [6, 74, 1], [7, 72, 1], [8, 69, 1], [9, 72, 1], [10, 76, 4, .6],
+    [0, 48, 2, .35], [2, [55, 64], 1, .25], [4, 53, 2, .35], [6, [57, 65], 1, .25], [8, 55, 2, .35], [10, [48, 60, 64], 4, .35]]) },
+  // ぴょーん：かけあがって、ぴょんぴょん
+  { cls: 'b-jump', fx: ['⭐', '💫', '🌟'], notes: seq([
+    [0, 60, 1], [1, 62, 1], [2, 64, 1], [3, 65, 1], [4, 67, 1], [5, 69, 1], [6, 71, 1], [7, 72, 2], [9, 76, 2, .6],
+    [11, 72, 1], [12, 76, 1], [13, 72, 1], [14, 76, 1], [15, 67, 1], [16, 72, 4, .6],
+    [0, 48, 2, .35], [4, 53, 2, .35], [7, 55, 2, .35], [11, 48, 1, .35], [13, 55, 1, .35], [16, [48, 60, 64], 4, .38]]) },
   // にっこり：ハートいっぱい
-  { cls: 'b-happy', ms: 1800, fx: ['💖', '💕', '🍯', '💗'],
-    notes: [[72, 0, 400], [71, 220, 300], [72, 400, 300], [76, 600, 900, .55], [65, 600, 900, .35], [69, 600, 900, .35]] },
+  { cls: 'b-happy', fx: ['💖', '💕', '🍯', '💗'], notes: seq([
+    [0, 72, 1], [1, 71, 1], [2, 72, 2], [4, 76, 1], [5, 74, 1], [6, 72, 2], [8, 69, 1], [9, 71, 1], [10, 72, 1], [11, 74, 1], [12, 76, 4, .6],
+    [0, 53, 2, .35], [2, [57, 65], 2, .25], [4, 48, 2, .35], [6, [55, 64], 2, .25], [8, 53, 2, .35], [10, 55, 2, .35], [12, [48, 60, 64], 4, .38]]) },
 ];
 buddy.addEventListener('pointerdown', e => {
   e.preventDefault(); e.stopPropagation(); piano.unlock();
@@ -535,7 +550,7 @@ buddy.addEventListener('pointerdown', e => {
   const x = (buddy.offsetLeft + top.offsetLeft + buddy.offsetWidth / 2) / W * 100;
   const y = (buddy.offsetTop + top.offsetTop + buddy.offsetHeight / 2) / H * 100;
   burst(sunFx, x, y, 8, r.fx, buddy.offsetWidth * 1.3);
-  setTimeout(() => { buddy.classList.remove(r.cls); bearBusy = false; }, r.ms * STRETCH);
+  setTimeout(() => { buddy.classList.remove(r.cls); bearBusy = false; }, phraseEnd(r.notes));
 });
 
 /* ================= くも（さわると反応） ================= */
@@ -545,28 +560,32 @@ function toApp(e) {
   return { x: e.clientX, y: e.clientY };
 }
 const CLOUD_REACTIONS = [
-  // あめ：ぽつぽつ雨がふって、しずくの音
-  { cls: 'k-rain', ms: 2200, run(p) {
+  // あめ：ぽつぽつ、ぴちゃん。しずくのリズム
+  { cls: 'k-rain', ms: 4700, run(p) {
       const pent = [76, 74, 72, 69, 67, 64, 62, 60];
-      for (let i = 0; i < 10; i++) setTimeout(() => {
+      for (let i = 0; i < 16; i++) setTimeout(() => {
         const d = document.createElement('span'); d.className = 'drop'; d.textContent = '💧';
         d.style.left = (p.x + (Math.random() - .5) * 90) + 'px'; d.style.top = (p.y + 10) + 'px';
         sunFx.appendChild(d); setTimeout(() => d.remove(), 1100);
         const m = pent[Math.floor(Math.random() * pent.length)];
-        piano.noteOn(m, 0.38); sparkleKey(m, 500); setTimeout(() => piano.noteOff(m), 750);
-      }, (150 + i * 160) * STRETCH);
+        piano.noteOn(m, i % 4 === 0 ? 0.45 : 0.33); sparkleKey(m, 400); setTimeout(() => piano.noteOff(m), 500);
+      }, i * 270 + (i % 2) * 60);                       // ちょっと はねるリズム
+      playPhrase(seq([[0, 57, 4, .3], [6, 53, 4, .3], [12, 48, 4, .3], [18, [55, 59], 5, .28]]));
   } },
-  // ぽよん：ふわふわはずむ
-  { cls: 'k-boing', ms: 1200, run(p) {
-      playPhrase([[60, 0, 300, .5], [67, 120, 300, .45], [72, 240, 700, .5], [64, 240, 700, .3]]);
+  // ぽよん：ぽん ぽん ぽぽん ぽーん
+  { cls: 'k-boing', ms: 2000, run(p) {
+      playPhrase(seq([[0, 60, 1], [1, 72, 1], [2, 60, 1], [3, 72, 1], [4, 67, .5], [4.5, 67, .5], [5, 72, 1], [6, 76, 3, .55],
+        [0, 48, 2, .35], [4, 55, 2, .35], [6, [48, 64], 3, .3]]));
       burst(sunFx, p.x / app.clientWidth * 100, p.y / app.clientHeight * 100, 6, ['☁️', '💨', '✨'], 70);
   } },
-  // にじ：虹がかかって、鍵盤が左から右へ順番に光る
-  { cls: 'k-rainbow', ms: 2000, run(p) {
+  // にじ：鍵盤が左から右へ順番に光って、くるっと戻って ジャーン
+  { cls: 'k-rainbow', ms: 3700, run(p) {
       const r = document.createElement('span'); r.className = 'mini-rainbow'; r.textContent = '🌈';
       r.style.left = p.x + 'px'; r.style.top = p.y + 'px';
-      sunFx.appendChild(r); setTimeout(() => r.remove(), 1900);
-      playPhrase([60, 62, 64, 65, 67, 69, 71, 72, 74, 76].map((m, i) => [m, i * 90, 600, .42]).concat([[72, 950, 900, .4], [76, 950, 900, .35], [67, 950, 900, .3]]));
+      sunFx.appendChild(r); setTimeout(() => r.remove(), 2600);
+      playPhrase(seq([...[60, 62, 64, 65, 67, 69, 71, 72, 74, 76].map((m, i) => [i, m, 1, .42]),
+        [10, 74, 1, .42], [11, 72, 1, .42], [12, 67, 1, .42], [13, [60, 64, 67, 72, 76], 6, .4],
+        [0, 48, 2, .32], [4, 53, 2, .32], [8, 55, 2, .32], [13, 48, 6, .35]]));
   } },
 ];
 let cloudLast = -1;
@@ -580,7 +599,7 @@ document.querySelectorAll('#scene .cloud').forEach(cl => {
     cl._busy = true;
     cin.classList.remove('k-rain', 'k-boing', 'k-rainbow'); void cin.getBoundingClientRect(); cin.classList.add(r.cls);
     r.run(toApp(e));
-    setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms * STRETCH);
+    setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms);
   });
 });
 
@@ -616,17 +635,14 @@ lockBtn.addEventListener('pointerup', () => {
 lockBtn.addEventListener('pointercancel', () => { lockBtn.classList.remove('pressing'); if (lockTimer) { clearTimeout(lockTimer); lockTimer = null; } });
 lockBtn.addEventListener('contextmenu', e => e.preventDefault());
 // 戻るボタンでアプリが閉じないようにする（ロックしていなくても）
-// さわるたびに「戻る用の段」を2段つみなおしておき、戻るボタンはその段を1つ使うだけにする
+// さわるたびに「戻る用の段」を12段までつみなおしておき、戻るボタンはその段を1つ使うだけにする
 function guardBack() {
-  const st = history.state && history.state.g;
-  if (st === 2) return;
-  if (st !== 1) history.pushState({ g: 1 }, '');
-  history.pushState({ g: 2 }, '');
+  let g = (history.state && history.state.g) || 0;
+  while (g < 12) { g++; history.pushState({ g }, ''); }
 }
 document.addEventListener('pointerdown', guardBack, true);
 addEventListener('popstate', () => {
   hideAll();                                   // 開いている画面（うた選びなど）は閉じる
-  if (history.state && history.state.g === 1) history.pushState({ g: 2 }, '');
   if (locked) toast(T('locked'));
 }, true);
 // 全画面がとけてしまったら、次にさわったときに全画面にもどす
