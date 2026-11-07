@@ -12,7 +12,24 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 #app { position: fixed; top: 0; left: 0; transform-origin: 0 0; overflow: hidden; }
 
 #scene { position: absolute; inset: 0; width: 100%; height: 100%; }
-.cloud { fill: #fff; opacity: .95; animation: drift linear infinite; }
+.cloud { fill: #fff; opacity: .95; animation: drift linear infinite; cursor: pointer; pointer-events: auto; }
+#scene { pointer-events: none; }
+.cin { transform-box: fill-box; transform-origin: center; transition: fill .4s; }
+.cin.k-rain { fill: #b9c7d8; animation: shiver .3s ease-in-out 4; }
+@keyframes shiver { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.cin.k-boing { animation: boing .9s cubic-bezier(.3,1.6,.5,1); }
+@keyframes boing { 0% { transform: scale(1); } 20% { transform: scale(1.3, .7); } 45% { transform: scale(.85, 1.2) translateY(-14px); } 70% { transform: scale(1.08, .94); } 100% { transform: none; } }
+.cin.k-rainbow { fill: #fffbe6; animation: glowCloud 1.8s ease-in-out; }
+@keyframes glowCloud { 50% { filter: drop-shadow(0 0 14px #fff6a0); } }
+.drop { position: absolute; font-size: 20px; transform: translate(-50%, 0); animation: dropFall 1.05s ease-in forwards; }
+@keyframes dropFall { to { margin-top: 170px; opacity: 0; } }
+.mini-rainbow { position: absolute; font-size: 54px; transform: translate(-50%, -20%) scale(.2); animation: rainbowPop 1.9s ease-out forwards; }
+@keyframes rainbowPop { 25% { transform: translate(-50%, -20%) scale(1.3); } 80% { transform: translate(-50%, -30%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -40%) scale(1.2); opacity: 0; } }
+/* たいよう・くもで光る鍵盤 */
+.key.sparkle { animation: sparkleKey .7s ease-out; }
+.white.sparkle { background: linear-gradient(#fff, var(--c)); }
+.black.sparkle { background: var(--c); }
+@keyframes sparkleKey { 0% { box-shadow: 0 0 0 4px #fff, 0 0 26px 10px var(--c); filter: brightness(1.25); } 100% { box-shadow: 0 0 0 0 transparent; filter: none; } }
 .c1 { animation-duration: 60s; transform: translate(200px, 40px); }
 .c2 { animation-duration: 80s; animation-delay: -30s; }
 .c3 { animation-duration: 70s; animation-delay: -55s; }

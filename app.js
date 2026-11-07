@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.6.0';
+const VERSION = '2.7.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -484,14 +484,41 @@ function celebrate(s) {
 
 /* ================= たいよう（さわると いろいろ反応） ================= */
 const sun = $('#sun'), sunFx = $('#sunFx');
+// メロディ：[音, 始まり(ms), 長さ(ms), 強さ]。ド(60)〜ミ(76)は鍵盤も光る
 const SUN_REACTIONS = [
-  { cls: 'r-laugh', ms: 1300, fx: ['😆', '♪', '♫', '💛'], n: 8,  notes: [[79, 0], [76, 110], [79, 220], [76, 330], [84, 460]] },
-  { cls: 'r-shine', ms: 1600, fx: ['✨', '🌟', '⭐', '💫'], n: 16, notes: [[72, 0], [76, 60], [79, 120], [84, 180], [88, 240], [91, 300], [96, 360]] },
-  { cls: 'r-wink',  ms: 1300, fx: ['💖', '💕', '💗'],      n: 6,  notes: [[76, 0], [84, 160]] },
-  { cls: 'r-wow',   ms: 1200, fx: ['❗', '❓', '✨'],       n: 6,  notes: [[72, 0], [76, 40], [79, 80], [84, 120]] },
-  { cls: 'r-spin',  ms: 2600, fx: ['💫', '🌀', '⭐'],      n: 8,  notes: [[96, 0], [91, 90], [88, 180], [84, 270], [79, 360], [76, 450], [72, 540]] },
-  { cls: 'r-cool',  ms: 1700, fx: ['😎', '✌️', '🎵'],      n: 6,  notes: [[48, 0], [55, 0], [60, 250], [64, 250], [67, 250]] },
+  // わらう：ころころ はずむメロディ
+  { cls: 'r-laugh', ms: 1700, fx: ['😆', '♪', '♫', '💛'], n: 8,
+    notes: [[67, 0, 300], [64, 150, 300], [67, 300, 300], [64, 450, 300], [69, 600, 300], [67, 750, 300], [72, 900, 900, .6], [48, 900, 1200, .35], [55, 900, 1200, .3]] },
+  // ひかる：ハープのようにキラキラ上がって、やさしい和音
+  { cls: 'r-shine', ms: 2000, fx: ['✨', '🌟', '⭐', '💫'], n: 16,
+    notes: [[60, 0, 1400], [64, 90, 1300], [67, 180, 1200], [72, 270, 1100], [76, 360, 1000], [79, 450, 900, .4], [84, 540, 900, .35], [88, 630, 900, .3], [65, 900, 1100, .35], [69, 900, 1100, .35], [72, 900, 1100, .35]] },
+  // ウインク：ピンポーン♪
+  { cls: 'r-wink',  ms: 1500, fx: ['💖', '💕', '💗'], n: 6,
+    notes: [[76, 0, 500, .6], [72, 260, 900, .55], [64, 260, 900, .3], [67, 260, 900, .3]] },
+  // びっくり：ジャジャーン！
+  { cls: 'r-wow',   ms: 1400, fx: ['❗', '❓', '✨'], n: 6,
+    notes: [[60, 0, 200], [67, 80, 200], [72, 160, 900, .7], [76, 160, 900, .6], [64, 160, 900, .45], [48, 160, 1000, .4]] },
+  // くるくる：上から下へ、ゆらゆら下りる
+  { cls: 'r-spin',  ms: 2600, fx: ['💫', '🌀', '⭐'], n: 8,
+    notes: [[76, 0, 350], [74, 140, 350], [72, 280, 350], [69, 420, 350], [67, 560, 350], [64, 700, 350], [62, 840, 350], [60, 980, 1200, .6], [67, 1120, 1000, .4], [72, 1260, 1000, .45]] },
+  // サングラス：ちょっとおしゃれなフレーズ
+  { cls: 'r-cool',  ms: 2000, fx: ['😎', '✌️', '🎵'], n: 6,
+    notes: [[60, 0, 250], [63, 180, 200], [64, 300, 250], [67, 480, 250], [69, 660, 250], [67, 840, 900, .55], [48, 840, 1000, .35], [57, 840, 1000, .3], [64, 840, 1000, .3]] },
 ];
+// メロディを鳴らして、鍵盤もいっしょに光らせる
+function playPhrase(notes) {
+  notes.forEach(([m, d, len, v = .5]) => setTimeout(() => {
+    piano.noteOn(m, v);
+    sparkleKey(m, Math.min(len, 700));
+    setTimeout(() => { if (!downCount.has(m)) piano.noteOff(m); }, len);
+  }, d));
+}
+function sparkleKey(m, ms) {
+  const el = keyEls.get(m); if (!el || song.cur) return;
+  el.classList.remove('sparkle'); void el.offsetWidth; el.classList.add('sparkle');
+  noteFx(m);
+  clearTimeout(el._sp); el._sp = setTimeout(() => el.classList.remove('sparkle'), ms);
+}
 let sunBusy = false, sunLast = -1;
 sun.addEventListener('pointerdown', e => {
   e.preventDefault(); e.stopPropagation();
@@ -503,13 +530,59 @@ sun.addEventListener('pointerdown', e => {
   const r = SUN_REACTIONS[i];
   sunBusy = true;
   sun.className = ''; void sun.offsetWidth; sun.classList.add(r.cls);
-  r.notes.forEach(([m, d]) => setTimeout(() => { piano.noteOn(m, 0.45); setTimeout(() => piano.noteOff(m), 400); }, d));
+  playPhrase(r.notes);
   // まわりにキラキラなどを飛ばす
   const W = app.clientWidth, H = app.clientHeight;
   const x = (sun.offsetLeft + sun.offsetWidth / 2) / W * 100, y = (sun.offsetTop + sun.offsetHeight / 2) / H * 100;
   burst(sunFx, x, y, r.n, r.fx, sun.offsetWidth * 1.2);
   hop();
   setTimeout(() => { sun.className = ''; sunBusy = false; }, r.ms);
+});
+
+/* ================= くも（さわると反応） ================= */
+// 画面の位置（指の位置）を #app の中の位置に直す（縦向きで回しているときも）
+function toApp(e) {
+  if (app.style.transform.includes('rotate')) return { x: e.clientY, y: innerWidth - e.clientX };
+  return { x: e.clientX, y: e.clientY };
+}
+const CLOUD_REACTIONS = [
+  // あめ：ぽつぽつ雨がふって、しずくの音
+  { cls: 'k-rain', ms: 2200, run(p) {
+      const pent = [76, 74, 72, 69, 67, 64, 62, 60];
+      for (let i = 0; i < 10; i++) setTimeout(() => {
+        const d = document.createElement('span'); d.className = 'drop'; d.textContent = '💧';
+        d.style.left = (p.x + (Math.random() - .5) * 90) + 'px'; d.style.top = (p.y + 10) + 'px';
+        sunFx.appendChild(d); setTimeout(() => d.remove(), 1100);
+        const m = pent[Math.floor(Math.random() * pent.length)];
+        piano.noteOn(m, 0.38); sparkleKey(m, 400); setTimeout(() => piano.noteOff(m), 500);
+      }, 150 + i * 160);
+  } },
+  // ぽよん：ふわふわはずむ
+  { cls: 'k-boing', ms: 1200, run(p) {
+      playPhrase([[60, 0, 300, .5], [67, 120, 300, .45], [72, 240, 700, .5], [64, 240, 700, .3]]);
+      burst(sunFx, p.x / app.clientWidth * 100, p.y / app.clientHeight * 100, 6, ['☁️', '💨', '✨'], 70);
+  } },
+  // にじ：虹がかかって、鍵盤が左から右へ順番に光る
+  { cls: 'k-rainbow', ms: 2000, run(p) {
+      const r = document.createElement('span'); r.className = 'mini-rainbow'; r.textContent = '🌈';
+      r.style.left = p.x + 'px'; r.style.top = p.y + 'px';
+      sunFx.appendChild(r); setTimeout(() => r.remove(), 1900);
+      playPhrase([60, 62, 64, 65, 67, 69, 71, 72, 74, 76].map((m, i) => [m, i * 90, 600, .42]).concat([[72, 950, 900, .4], [76, 950, 900, .35], [67, 950, 900, .3]]));
+  } },
+];
+let cloudLast = -1;
+document.querySelectorAll('#scene .cloud').forEach(cl => {
+  cl.addEventListener('pointerdown', e => {
+    e.preventDefault(); piano.unlock();
+    if (cl._busy) return;
+    let i; do { i = Math.floor(Math.random() * CLOUD_REACTIONS.length); } while (i === cloudLast);
+    cloudLast = i;
+    const r = CLOUD_REACTIONS[i], cin = cl.querySelector('.cin');
+    cl._busy = true;
+    cin.classList.remove('k-rain', 'k-boing', 'k-rainbow'); void cin.getBoundingClientRect(); cin.classList.add(r.cls);
+    r.run(toApp(e));
+    setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms);
+  });
 });
 
 /* ================= 画面の切り替え ================= */
