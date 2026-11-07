@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.7.0';
+const VERSION = '2.7.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -268,7 +268,7 @@ const SONGS = [
   { id: 'mary', e: '🐑', ja: 'メリーさんのひつじ', en: 'Mary Had a Little Lamb', zh: '瑪莉有隻小綿羊', b: '#f3ecff', bpm: 110,
     n: 'E4:1.5 D4:.5 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4:1.5 D4:.5 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4' },
   { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', zh: '王老先生有塊地', b: '#e9f7d4', bpm: 120,
-    n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
+    n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 C4:.5 C4:.5 F4 F4 F4:2 C4:.5 C4:.5 F4 F4 F4:2 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4:.5 F4:.5 F4 F4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 C4:.5 C4:.5 F4 F4 F4:2 C4:.5 C4:.5 F4 F4 F4:2 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4:.5 F4:.5 F4 F4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
   { id: 'alps', e: '🏔️', ja: 'アルプスいちまんじゃく', en: 'Yankee Doodle', zh: '洋基歌', b: '#e3f0ff', bpm: 150,
     n: 'F4 F4 G4 A4 F4 A4 G4 C4 F4 F4 G4 A4 F4:2 E4:2 F4 F4 G4 A4 Bb4 A4 G4 F4 E4 C4 D4 E4 F4:2 F4:2' },
   { id: 'jingle', e: '🔔', ja: 'ジングルベル', en: 'Jingle Bells', zh: '鈴兒響叮噹', b: '#ffdcdc', bpm: 130,
