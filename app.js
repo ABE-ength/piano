@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.3.1';
+const VERSION = '3.3.2';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -277,7 +277,7 @@ document.addEventListener('pointerdown', () => piano.unlock(), { capture: true }
 // 音名:拍（拍を省くと1拍）。著作権の切れた曲・昔からの歌のメロディです。
 const SONGS = [
   { id: 'bear', e: '🐻', ja: 'もりのくまさん', en: 'The Other Day I Met a Bear', zh: '森林裡的熊先生', b: '#f6e3cf', bpm: 120,
-    n: 'G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4 C5:2 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4 G4:2 F4:.5 E4:.5 D4 C4:2 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4 C5:2 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4 G4:2 F4:.5 E4:.5 D4 C4:4' },
+    n: 'R:.5 G4:.5 A4:.5 B4:.5 C5 G4 E4 C4 A4:2 R:.5 A4:.5 B4:.5 A4:.5 G4 G#4 A4 B4 C5:2 R:.5 G4:.5 F#4:.5 G4:.5 E4 R:1.5 E4:.5 D#4:.5 E4:.5 C4 R:1.5 E4:.5 D4:.5 C4:.5 D4 R:1.5 G4:.5 A4:.5 G4:.5 E4 R:1.5 G4:.5 A4:.5 B4:.5 C5 G4 E4 C4 A4:2 R:.5 A4:.5 B4:.5 A4:.5 G4 F4 E4 D4 C4:3' },
   { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', zh: '小星星', b: '#fff3b8', bpm: 100,
     n: 'C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2' },
   { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', zh: '生日快樂', b: '#ffe8c2', bpm: 100,
@@ -323,12 +323,13 @@ const NAME = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 function parse(str) {
   return str.trim().split(/\s+/).map(tok => {
     const [n, d] = tok.split(':');
+    if (n === 'R') return { m: null, d: d ? parseFloat(d) : 1 };   // R = 休符
     const mm = /^([A-G])(b|#)?(\d)$/.exec(n);
     const m = 12 * (+mm[3] + 1) + NAME[mm[1]] + (mm[2] === 'b' ? -1 : mm[2] === '#' ? 1 : 0);
     return { m, d: d ? parseFloat(d) : 1 };
   });
 }
-SONGS.forEach(s => s.notes = parse(s.n));
+SONGS.forEach(s => { s.timed = parse(s.n); s.notes = s.timed.filter(x => x.m != null); });   // timed は休符つき
 // 子どもが喜びそうな順に並べる
 const ORDER = ['bear', 'kira', 'birthday', 'kaeru', 'chou', 'mary', 'railroad', 'ants', 'farm', 'camptown', 'alps', 'jingle',
   'london', 'frere', 'row', 'susanna', 'akatonbo', 'turkish', 'joy', 'lullaby', 'elise'];
@@ -430,9 +431,11 @@ const song = {
   },
   playAlong() {
     const s = this.cur, beat = 60 / (s.bpm * S.speed) * 1000;
-    let t = 500;
-    s.notes.forEach((n, i) => {
+    let t = 500, k = 0;
+    s.timed.forEach(n => {
       const dur = n.d * beat;
+      if (n.m == null) { t += dur; return; }          // 休符：音を出さずに待つ
+      const i = k++;
       this.timers.push(setTimeout(() => {
         this.light(null); this.light(n.m); this.idx = i + 1; this.progress();
         if (S.guide) { piano.noteOn(n.m, 0.55); this.guideNotes.add(n.m); }
