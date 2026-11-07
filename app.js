@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.1.1';
+const VERSION = '3.2.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -569,53 +569,54 @@ buddy.addEventListener('pointerdown', e => {
   setTimeout(() => { buddy.classList.remove(r.cls); bearBusy = false; }, phraseEnd(r.notes));
 });
 
-/* ================= くも（さわると反応） ================= */
+/* ================= もりの背景（さわると反応） ================= */
 // 画面の位置（指の位置）を #app の中の位置に直す（縦向きで回しているときも）
 function toApp(e) {
   if (app.style.transform.includes('rotate')) return { x: e.clientY, y: innerWidth - e.clientX };
   return { x: e.clientX, y: e.clientY };
 }
-const CLOUD_REACTIONS = [
-  // あめ：ぽつぽつ、ぴちゃん。しずくのリズム
-  { cls: 'k-rain', ms: 4700, run(p) {
+// もりの中のものに さわると、音が鳴って鍵盤も光る
+function fallFx(p, items, n, gap) {
+  for (let i = 0; i < n; i++) setTimeout(() => {
+    const d = document.createElement('span'); d.className = 'fall-item';
+    d.textContent = items[Math.floor(Math.random() * items.length)];
+    d.style.left = (p.x + (Math.random() - .5) * 110) + 'px'; d.style.top = (p.y + 10) + 'px';
+    sunFx.appendChild(d); setTimeout(() => d.remove(), 1300);
+  }, i * gap);
+}
+const SCENE_REACTIONS = {
+  // りんごの枝：ゆさゆさ ゆれて、りんごと葉っぱが ぽとぽと落ちる
+  apple: { cls: 'k-shake', ms: 4400, run(p) {
+      fallFx(p, ['🍎', '🍃', '🍎', '🍂'], 14, 280);
       const pent = [76, 74, 72, 69, 67, 64, 62, 60];
-      for (let i = 0; i < 16; i++) setTimeout(() => {
-        const d = document.createElement('span'); d.className = 'drop'; d.textContent = '💧';
-        d.style.left = (p.x + (Math.random() - .5) * 90) + 'px'; d.style.top = (p.y + 10) + 'px';
-        sunFx.appendChild(d); setTimeout(() => d.remove(), 1100);
-        const m = pent[Math.floor(Math.random() * pent.length)];
-        piano.noteOn(m, i % 4 === 0 ? 0.45 : 0.33); sparkleKey(m, 400); setTimeout(() => piano.noteOff(m), 500);
-      }, i * 270 + (i % 2) * 60);                       // ちょっと はねるリズム
-      playPhrase(seq([[0, 57, 4, .3], [6, 53, 4, .3], [12, 48, 4, .3], [18, [55, 59], 5, .28]]));
+      const notes = [];
+      for (let i = 0; i < 14; i++) notes.push([i * 1.55 + (i % 2) * .3, pent[Math.floor(Math.random() * pent.length)], 1.2, i % 4 === 0 ? .45 : .33]);
+      playPhrase(seq(notes.concat([[0, 53, 4, .3], [6, 48, 4, .3], [12, 55, 4, .3], [18, [48, 55], 5, .28]])));
   } },
-  // ぽよん：ぽん ぽん ぽぽん ぽーん
-  { cls: 'k-boing', ms: 2000, run(p) {
-      playPhrase(seq([[0, 60, 1], [1, 72, 1], [2, 60, 1], [3, 72, 1], [4, 67, .5], [4.5, 67, .5], [5, 72, 1], [6, 76, 3, .55],
-        [0, 48, 2, .35], [4, 55, 2, .35], [6, [48, 64], 3, .3]]));
-      burst(sunFx, p.x / app.clientWidth * 100, p.y / app.clientHeight * 100, 6, ['☁️', '💨', '✨'], 70);
+  // 小鳥：ぴょこぴょこ はねて さえずる
+  bird: { cls: 'k-tweet', ms: 3200, run(p) {
+      burst(sunFx, p.x / app.clientWidth * 100, p.y / app.clientHeight * 100, 7, ['🎵', '🎶', '🪶', '✨'], 70);
+      playPhrase(seq([[0, 76, .5], [.5, 72, .5], [1, 76, .5], [1.5, 72, .5], [2, 79, 1, .4], [4, 74, .5], [4.5, 76, .5], [5, 74, .5], [5.5, 72, .5],
+        [6, 67, 1], [7, 72, 1], [8, 76, .5], [8.5, 74, .5], [9, 72, .5], [9.5, 74, .5], [10, 76, 4, .55],
+        [0, 48, 2, .32], [2, [55, 64], 2, .24], [4, 53, 2, .32], [6, [57, 65], 2, .24], [8, 55, 2, .32], [10, [48, 60, 64], 4, .35]]));
   } },
-  // にじ：鍵盤が左から右へ順番に光って、くるっと戻って ジャーン
-  { cls: 'k-rainbow', ms: 3700, run(p) {
-      const r = document.createElement('span'); r.className = 'mini-rainbow'; r.textContent = '🌈';
-      r.style.left = p.x + 'px'; r.style.top = p.y + 'px';
-      sunFx.appendChild(r); setTimeout(() => r.remove(), 2600);
+  // ちょうちょ：くるっと まわって、ひらひらメロディ（虹のように鍵盤が光る）
+  bfly: { cls: 'k-twirl', ms: 3700, run(p) {
+      burst(sunFx, p.x / app.clientWidth * 100, p.y / app.clientHeight * 100, 8, ['✨', '🌸', '💫', '🦋'], 80);
       playPhrase(seq([...[60, 62, 64, 65, 67, 69, 71, 72, 74, 76].map((m, i) => [i, m, 1, .42]),
         [10, 74, 1, .42], [11, 72, 1, .42], [12, 67, 1, .42], [13, [60, 64, 67, 72, 76], 6, .4],
         [0, 48, 2, .32], [4, 53, 2, .32], [8, 55, 2, .32], [13, 48, 6, .35]]));
   } },
-];
-let cloudLast = -1;
-document.querySelectorAll('#scene .cloud').forEach(cl => {
-  cl.addEventListener('pointerdown', e => {
+};
+document.querySelectorAll('#scene .item').forEach(it => {
+  it.addEventListener('pointerdown', e => {
     e.preventDefault(); piano.unlock();
-    if (cl._busy) return;
-    let i; do { i = Math.floor(Math.random() * CLOUD_REACTIONS.length); } while (i === cloudLast);
-    cloudLast = i;
-    const r = CLOUD_REACTIONS[i], cin = cl.querySelector('.cin');
-    cl._busy = true;
-    cin.classList.remove('k-rain', 'k-boing', 'k-rainbow'); void cin.getBoundingClientRect(); cin.classList.add(r.cls);
+    if (it._busy) return;
+    const r = SCENE_REACTIONS[it.dataset.react], inner = it.querySelector('.inner');
+    it._busy = true;
+    inner.classList.remove('k-shake', 'k-tweet', 'k-twirl'); void inner.getBoundingClientRect(); inner.classList.add(r.cls);
     r.run(toApp(e));
-    setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms);
+    setTimeout(() => { inner.classList.remove(r.cls); it._busy = false; }, r.ms);
   });
 });
 

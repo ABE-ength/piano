@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#7fd3ff">
+<meta name="theme-color" content="#8fcf6f">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
@@ -16,29 +16,85 @@
   <!-- アニメ風の背景 -->
   <svg id="scene" viewBox="0 0 1600 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <defs>
-      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#6ccaff"/><stop offset="1" stop-color="#d4f3ff"/>
+      <linearGradient id="forestBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#d9f2b4"/><stop offset=".45" stop-color="#b7e39a"/><stop offset="1" stop-color="#7fc66a"/>
       </linearGradient>
-      <radialGradient id="sunG"><stop offset="0" stop-color="#fff2a8"/><stop offset="1" stop-color="#ffcf33"/></radialGradient>
+      <linearGradient id="rayG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fffbe0" stop-opacity=".85"/><stop offset="1" stop-color="#fffbe0" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="appleG" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#ff8a80"/><stop offset="1" stop-color="#e53935"/></radialGradient>
     </defs>
-    <rect width="1600" height="700" fill="url(#sky)"/>
-    <g opacity=".55" fill="none" stroke-width="26">
-      <circle cx="420" cy="620" r="420" stroke="#ff8a8a"/>
-      <circle cx="420" cy="620" r="394" stroke="#ffc46b"/>
-      <circle cx="420" cy="620" r="368" stroke="#fff27a"/>
-      <circle cx="420" cy="620" r="342" stroke="#9ce88a"/>
-      <circle cx="420" cy="620" r="316" stroke="#8fd0ff"/>
-      <circle cx="420" cy="620" r="290" stroke="#b9a2ff"/>
+    <rect width="1600" height="700" fill="url(#forestBg)"/>
+    <!-- 木もれ日 -->
+    <g class="rays">
+      <polygon class="ray r1" points="380,0 470,0 640,700 470,700" fill="url(#rayG)"/>
+      <polygon class="ray r2" points="900,0 960,0 1080,700 960,700" fill="url(#rayG)"/>
+      <polygon class="ray r3" points="1250,0 1330,0 1480,700 1330,700" fill="url(#rayG)"/>
     </g>
-    <g class="cloud c1"><g class="cin"><circle cx="0" cy="40" r="38"/><circle cx="45" cy="25" r="48"/><circle cx="100" cy="42" r="36"/><rect x="-30" y="40" width="160" height="38" rx="19"/></g></g>
-    <g class="cloud c2"><g class="cin"><circle cx="0" cy="40" r="30"/><circle cx="38" cy="22" r="40"/><circle cx="82" cy="40" r="30"/><rect x="-24" y="38" width="130" height="32" rx="16"/></g></g>
-    <g class="cloud c3"><g class="cin"><circle cx="0" cy="40" r="26"/><circle cx="32" cy="26" r="34"/><circle cx="70" cy="40" r="26"/><rect x="-20" y="38" width="112" height="28" rx="14"/></g></g>
-    <path d="M0 520 Q300 400 650 500 T1300 470 T1600 480 V700 H0Z" fill="#9be38a"/>
-    <path d="M0 580 Q400 500 800 570 T1600 540 V700 H0Z" fill="#74cf63"/>
-    <g class="flowers">
-      <circle cx="120" cy="560" r="10" fill="#ff7eb6"/><circle cx="260" cy="530" r="9" fill="#fff"/>
-      <circle cx="1350" cy="520" r="10" fill="#ffe14d"/><circle cx="1480" cy="545" r="9" fill="#ff7eb6"/>
+    <!-- 奥の木 -->
+    <g fill="#8fbf6e" opacity=".55">
+      <rect x="120" y="60" width="34" height="640" rx="14"/><rect x="330" y="90" width="26" height="610" rx="12"/>
+      <rect x="720" y="70" width="30" height="630" rx="13"/><rect x="1180" y="80" width="28" height="620" rx="12"/>
+      <rect x="1430" y="50" width="36" height="650" rx="15"/>
     </g>
+    <!-- 手前の木（左右のはし） -->
+    <g fill="#9a6a44"><rect x="10" y="120" width="70" height="580" rx="20"/><rect x="1520" y="110" width="70" height="590" rx="20"/></g>
+    <!-- 上の木の葉（ゆれる） -->
+    <g class="canopy">
+      <g fill="#4f9e3f">
+        <circle cx="40" cy="20" r="120"/><circle cx="240" cy="-10" r="110"/><circle cx="430" cy="-30" r="100"/><circle cx="650" cy="-50" r="100"/>
+        <circle cx="950" cy="-50" r="100"/><circle cx="1180" cy="-30" r="100"/><circle cx="1380" cy="-10" r="110"/><circle cx="1570" cy="20" r="120"/>
+      </g>
+      <g fill="#6bbd53">
+        <circle cx="130" cy="-20" r="90"/><circle cx="340" cy="-40" r="80"/><circle cx="800" cy="-75" r="100"/>
+        <circle cx="1270" cy="-40" r="80"/><circle cx="1480" cy="-20" r="90"/>
+      </g>
+      <g fill="#86d16a" opacity=".9">
+        <circle cx="90" cy="-50" r="50"/><circle cx="520" cy="-70" r="55"/><circle cx="1080" cy="-70" r="55"/><circle cx="1520" cy="-50" r="50"/>
+      </g>
+    </g>
+    <!-- りんごの枝（さわれる） -->
+    <g class="item apple" data-react="apple">
+      <g class="inner">
+        <path d="M430 -10 Q520 70 610 80" stroke="#8a5a36" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <g fill="#5fb04a"><ellipse cx="500" cy="60" rx="34" ry="20" transform="rotate(-25 500 60)"/><ellipse cx="575" cy="95" rx="30" ry="18" transform="rotate(20 575 95)"/><ellipse cx="610" cy="60" rx="28" ry="16" transform="rotate(-10 610 60)"/></g>
+        <g class="apples"><circle cx="530" cy="105" r="22" fill="url(#appleG)"/><circle cx="600" cy="120" r="20" fill="url(#appleG)"/><circle cx="470" cy="85" r="18" fill="url(#appleG)"/>
+          <circle cx="523" cy="98" r="5" fill="#fff" opacity=".7"/><circle cx="594" cy="113" r="4.5" fill="#fff" opacity=".7"/><circle cx="465" cy="80" r="4" fill="#fff" opacity=".7"/>
+          <path d="M530 84 l3 -10 M600 101 l3 -9 M470 68 l3 -8" stroke="#6b4423" stroke-width="3" stroke-linecap="round"/></g>
+      </g>
+    </g>
+    <!-- 小鳥（さわれる） -->
+    <g class="item bird" data-react="bird">
+      <path d="M990 -10 Q1010 60 1000 140 M1000 140 Q1090 150 1170 120" stroke="#6b8f3a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <g class="inner">
+        <ellipse cx="1090" cy="115" rx="34" ry="30" fill="#5ec0f2"/>
+        <ellipse cx="1098" cy="124" rx="20" ry="16" fill="#fff6d6"/>
+        <path class="wingL" d="M1064 112 q-22 6 -16 26 q16 -4 24 -18z" fill="#3a9fd8"/>
+        <circle cx="1104" cy="104" r="6" fill="#2b2b33"/><circle cx="1106" cy="102" r="2" fill="#fff"/>
+        <path d="M1122 110 l18 6 l-18 6z" fill="#ffb300"/>
+        <circle cx="1098" cy="118" r="5" fill="#ff9aa8" opacity=".7"/>
+        <path d="M1060 96 q-10 -20 6 -22 q2 10 -6 22z" fill="#3a9fd8"/>
+      </g>
+    </g>
+    <!-- ちょうちょ（とびまわる・さわれる） -->
+    <g class="fly f1"><g class="bob"><g class="item bfly" data-react="bfly"><g class="inner">
+      <g class="wings"><path d="M0 0 C-30 -40 -60 -10 -34 14 C-22 24 -6 10 0 0z" fill="#ff8fc0"/><path d="M0 0 C30 -40 60 -10 34 14 C22 24 6 10 0 0z" fill="#ff8fc0"/>
+      <circle cx="-26" cy="-6" r="6" fill="#fff" opacity=".7"/><circle cx="26" cy="-6" r="6" fill="#fff" opacity=".7"/></g>
+      <ellipse cx="0" cy="4" rx="4" ry="14" fill="#5a3a4a"/><circle cx="0" cy="-10" r="10" fill="none" stroke="transparent" stroke-width="40"/></g></g></g></g>
+    <g class="fly f2"><g class="bob"><g class="item bfly" data-react="bfly"><g class="inner">
+      <g class="wings"><path d="M0 0 C-30 -40 -60 -10 -34 14 C-22 24 -6 10 0 0z" fill="#ffd54d"/><path d="M0 0 C30 -40 60 -10 34 14 C22 24 6 10 0 0z" fill="#ffd54d"/>
+      <circle cx="-26" cy="-6" r="6" fill="#fff" opacity=".7"/><circle cx="26" cy="-6" r="6" fill="#fff" opacity=".7"/></g>
+      <ellipse cx="0" cy="4" rx="4" ry="14" fill="#5a3a4a"/><circle cx="0" cy="-10" r="10" fill="none" stroke="transparent" stroke-width="40"/></g></g></g></g>
+    <!-- ひらひら落ちる葉っぱ -->
+    <g class="leaves" fill="#7cc85e">
+      <path class="lf l1" d="M0 0 q14 -14 28 0 q-14 14 -28 0z"/><path class="lf l2" d="M0 0 q14 -14 28 0 q-14 14 -28 0z" fill="#f2b84b"/>
+      <path class="lf l3" d="M0 0 q14 -14 28 0 q-14 14 -28 0z"/><path class="lf l4" d="M0 0 q14 -14 28 0 q-14 14 -28 0z" fill="#9bd77a"/>
+      <path class="lf l5" d="M0 0 q14 -14 28 0 q-14 14 -28 0z" fill="#e8964a"/>
+    </g>
+    <!-- 地面 -->
+    <path d="M0 560 Q400 500 800 560 T1600 540 V700 H0Z" fill="#6cbf55"/>
+    <g><circle cx="60" cy="600" r="10" fill="#ff7eb6"/><circle cx="1540" cy="590" r="10" fill="#ffe14d"/>
+      <path d="M30 640 q20 -40 40 0z" fill="#e53935"/><circle cx="42" cy="630" r="3" fill="#fff"/><circle cx="56" cy="626" r="3" fill="#fff"/><rect x="45" y="638" width="10" height="16" fill="#fff3e0"/></g>
   </svg>
 
   <!-- 上の帯 -->
