@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.3.0';
+const VERSION = '3.3.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -277,7 +277,7 @@ document.addEventListener('pointerdown', () => piano.unlock(), { capture: true }
 // 音名:拍（拍を省くと1拍）。著作権の切れた曲・昔からの歌のメロディです。
 const SONGS = [
   { id: 'bear', e: '🐻', ja: 'もりのくまさん', en: 'The Other Day I Met a Bear', zh: '森林裡的熊先生', b: '#f6e3cf', bpm: 120,
-    n: 'G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:3 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:4' },
+    n: 'G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4 C5:2 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4 G4:2 F4:.5 E4:.5 D4 C4:2 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4 C5:2 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4 G4:2 F4:.5 E4:.5 D4 C4:4' },
   { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', zh: '小星星', b: '#fff3b8', bpm: 100,
     n: 'C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2' },
   { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', zh: '生日快樂', b: '#ffe8c2', bpm: 100,
@@ -464,7 +464,6 @@ function fanfare() {
   at(1100, 0, [60, 64, 67, 72, 76], 0.95);
   // キラキラ〜（高い音がかけあがる）
   [84, 86, 88, 91, 93, 96, 98, 100].forEach((m, i) => setTimeout(() => piano.noteOn(m, 0.35), 1500 + i * 70));
-  setTimeout(() => piano.applause(2.6), 1100);
 }
 function burst(box, x, y, n, items, dist) {
   for (let i = 0; i < n; i++) {
