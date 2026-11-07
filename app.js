@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.1.0';
+const VERSION = '3.1.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -254,6 +254,22 @@ kb.addEventListener('pointerdown', e => {
 kb.addEventListener('pointermove', e => { if (pointers.has(e.pointerId)) handle(e, false); });
 const up = e => { const p = pointers.get(e.pointerId); pointers.delete(e.pointerId); if (p != null) release(p); };
 kb.addEventListener('pointerup', up); kb.addEventListener('pointercancel', up);
+kb.addEventListener('lostpointercapture', up);
+// 押されたまま残った鍵盤を、すべて元にもどす
+function releaseAll() {
+  pointers.clear();
+  for (const m of [...downCount.keys()]) { if (!song.guideNotes.has(m)) piano.noteOff(m); }
+  downCount.clear();
+  kb.querySelectorAll('.key.down').forEach(k => k.classList.remove('down'));
+}
+// 画面から指がぜんぶ離れたら、念のため全部もどす（「指を離した」の知らせが届かなかったとき用）
+document.addEventListener('touchend', e => { if (e.touches.length === 0) releaseAll(); }, true);
+document.addEventListener('touchcancel', e => { if (e.touches.length === 0) releaseAll(); }, true);
+addEventListener('blur', releaseAll);
+addEventListener('resize', releaseAll);
+document.addEventListener('fullscreenchange', releaseAll);
+// さらに念のため：指が1本もふれていないのに押されたままの鍵盤があれば、もどす
+setInterval(() => { if (pointers.size === 0 && kb.querySelector('.key.down')) releaseAll(); }, 700);
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('pointerdown', () => piano.unlock(), { capture: true });
 
