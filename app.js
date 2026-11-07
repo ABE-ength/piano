@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.2.2';
+const VERSION = '3.3.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -79,7 +79,7 @@ function tryLockLandscape() {
 /* ================= 音名・色 ================= */
 const isBlack = m => [1, 3, 6, 8, 10].includes(m % 12);
 const COLOR = ['#ff5a5a', '#ff7a45', '#ff9f1c', '#f4b400', '#f2c200', '#4cc94c', '#2fbf9a', '#29b6f6', '#3d8bff', '#5c6bff', '#8e6bff', '#c45cff'];
-const LOW = 60, HIGH = 76;                       // ド(C4)〜ミ(E5)
+const LOW = 60, HIGH = 77;                       // ド(C4)〜ファ(F5)
 
 /* ================= ピアノの音（本物のグランドピアノの録音） ================= */
 const SAMPLES = [['C3', 48], ['Ds3', 51], ['Fs3', 54], ['A3', 57], ['C4', 60], ['Ds4', 63], ['Fs4', 66],
@@ -223,7 +223,7 @@ function press(m) {
   downCount.set(m, (downCount.get(m) || 0) + 1);
   keyEls.get(m)?.classList.add('down');
   piano.noteOn(m, 0.9);
-  noteFx(m); hop();
+  noteFx(m); hop(); watchPlay(m);
   song.onPress(m);
 }
 function release(m) {
@@ -289,15 +289,13 @@ const SONGS = [
   { id: 'mary', e: '🐑', ja: 'メリーさんのひつじ', en: 'Mary Had a Little Lamb', zh: '瑪莉有隻小綿羊', b: '#f3ecff', bpm: 110,
     n: 'E4:1.5 D4:.5 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4:1.5 D4:.5 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4' },
   { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', zh: '王老先生有塊地', b: '#e9f7d4', bpm: 120,
-    n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 C4:.5 C4:.5 F4 F4 F4:2 C4:.5 C4:.5 F4 F4 F4:2 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4:.5 F4:.5 F4 F4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 C4:.5 C4:.5 F4 F4 F4:2 C4:.5 C4:.5 F4 F4 F4:2 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4:.5 F4:.5 F4 F4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
+    n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 C4:.5 C4:.5 F4 F4 F4:2 C4:.5 C4:.5 F4 F4 F4:2 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4:.5 F4:.5 F4 F4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
   { id: 'alps', e: '🏔️', ja: 'アルプスいちまんじゃく', en: 'Yankee Doodle', zh: '洋基歌', b: '#e3f0ff', bpm: 150,
     n: 'F4 F4 G4 A4 F4 A4 G4 C4 F4 F4 G4 A4 F4:2 E4:2 F4 F4 G4 A4 Bb4 A4 G4 F4 E4 C4 D4 E4 F4:2 F4:2' },
   { id: 'jingle', e: '🔔', ja: 'ジングルベル', en: 'Jingle Bells', zh: '鈴兒響叮噹', b: '#ffdcdc', bpm: 130,
     n: 'E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4:1.5 F4:.5 F4 E4 E4 E4:.5 E4:.5 E4 D4 D4 E4 D4:2 G4:2 E4 E4 E4:2 E4 E4 E4:2 E4 G4 C4:1.5 D4:.5 E4:4 F4 F4 F4 F4 F4 E4 E4 E4:.5 E4:.5 G4 G4 F4 D4 C4:4' },
   { id: 'london', e: '🌉', ja: 'ロンドンばし', en: 'London Bridge', zh: '倫敦鐵橋', b: '#e0f1ff', bpm: 110,
     n: 'G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4 E4 F4:2 E4 F4 G4:2 G4:1.5 A4:.5 G4 F4 E4 F4 G4:2 D4:2 G4:2 E4 C4:3' },
-  { id: 'spider', e: '🕷️', ja: 'ちいさなクモさん', en: 'Itsy Bitsy Spider', zh: '小蜘蛛', b: '#eaf4ff', bpm: 110,
-    n: 'C4:.5 F4 F4:.5 F4 G4:.5 A4:1.5 A4 A4:.5 G4 F4:.5 G4 A4:.5 F4:3 A4:1.5 A4 Bb4:.5 C5:3 C5 Bb4:.5 A4 Bb4:.5 C5:1.5 A4:3 F4:1.5 F4 G4:.5 A4:3 A4 G4:.5 F4 G4:.5 A4:1.5 F4:3 C4:.5 C4:.5 F4 F4:.5 F4 G4:.5 A4:1.5 A4 A4:.5 G4 F4:.5 G4 A4:.5 F4:3' },
   { id: 'frere', e: '😴', ja: 'フレール・ジャック', en: 'Frère Jacques', zh: '兩隻老虎', b: '#fff0f6', bpm: 110,
     n: 'F4 G4 A4 F4 F4 G4 A4 F4 A4 Bb4 C5:2 A4 Bb4 C5:2 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 C5:.5 D5:.5 C5:.5 Bb4:.5 A4 F4 F4 C4 F4:2 F4 C4 F4:2' },
   { id: 'row', e: '⛵', ja: 'こげこげボート', en: 'Row Your Boat', zh: '划船歌', b: '#d9f4ff', bpm: 110,
@@ -306,14 +304,20 @@ const SONGS = [
     n: 'C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 D4 C4:3 F4:2 F4:2 A4:2 A4:1.5 A4:.5 G4 G4 E4 C4 D4:3 C4:.5 D4:.5 E4 G4 G4:.75 A4:.25 G4 E4 C4:.75 D4:.25 E4 E4 D4 D4 C4:3' },
   { id: 'camptown', e: '🐎', ja: 'くさけいば', en: 'Camptown Races', zh: '康城賽馬', b: '#e8f6dc', bpm: 120,
     n: 'G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 E4:.5 D4:1.5 E4:.5 D4:1.5 G4:.5 G4:.5 E4:.5 G4:.5 A4:.5 G4:.5 E4 D4:.5 D4:.5 E4:.5 D4:.5 C4:2' },
-  { id: 'hotcross', e: '🥐', ja: 'ホットクロスバン', en: 'Hot Cross Buns', zh: '熱十字麵包', b: '#fff1dc', bpm: 110,
-    n: 'E4 D4 C4:2 E4 D4 C4:2 C4:.5 C4:.5 C4:.5 C4:.5 D4:.5 D4:.5 D4:.5 D4:.5 E4 D4 C4:2' },
   { id: 'joy', e: '🎵', ja: 'よろこびのうた', en: 'Ode to Joy', zh: '歡樂頌', b: '#fff0d6', bpm: 110,
     n: 'E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4:1.5 D4:.5 D4:2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4:1.5 C4:.5 C4:2' },
   { id: 'lullaby', e: '🌙', ja: 'ブラームスのこもりうた', en: "Brahms' Lullaby", zh: '布拉姆斯搖籃曲', b: '#e6e6ff', bpm: 90,
     n: 'E4:.5 E4:.5 G4:2 E4:.5 E4:.5 G4:2 E4:.5 G4:.5 C5 B4:1.5 A4:.5 A4 G4 D4:.5 E4:.5 F4 D4 D4:.5 E4:.5 F4:2 D4:.5 F4:.5 B4:.5 A4:.5 G4 B4 C5:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4 G4 A4 G4:2 C4:.5 C4:.5 C5:2 A4:.5 F4:.5 G4:2 E4:.5 C4:.5 F4 E4:.5 D4:.5 C4:3' },
   { id: 'elise', e: '🎹', ja: 'エリーゼのために', en: 'Für Elise', zh: '給愛麗絲', b: '#f6eaff', bpm: 100,
     n: 'E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 G#4:.5 B4:.5 C5:1.5 E4:.5 E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 C5:.5 B4:.5 A4:3' },
+  { id: 'ants', e: '🐜', ja: 'ありの こうしん', en: 'The Ants Go Marching', zh: '螞蟻向前走', b: '#f3ead8', bpm: 150,
+    n: 'E4:.5 E4:.5 A4:.5 A4:.5 A4 B4:.5 C5 B4:.5 C5 A4:.5 G4:2.5 E4:.5 G4:2.5 A4:.5 E4:.5 A4:.5 A4:.5 A4 B4:.5 C5 B4:.5 C5 D5:.5 E5:2.5 C5:.5 E5:2.5 C5:.5 E5 E5:.5 E5:.5 D5:.5 C5:.5 D5 D5:.5 D5 B4:.5 C5 C5:.5 C5:.5 B4:.5 A4:.5 B4 B4:.5 B4:.5 C5:.5 D5:.5 E5:1.5 D5:1.5 C5:1.5 B4 A4:.5 A4:2 E4 F#4 G#4 A4:2' },
+  { id: 'railroad', e: '🚂', ja: 'せんろは つづくよ', en: "I've Been Working on the Railroad", zh: '我在鐵路上工作', b: '#e2ecf7', bpm: 130,
+    n: 'F4 C4:.5 F4 C4:.5 F4 G4:.5 A4:1.5 F4:2 Bb4 Bb4:.5 F4 G4:.5 A4:3 F4 C4:.5 F4 C4:.5 F4 G4:.5 A4:1.5 F4:2 A4 A4:.5 A4 G4:.5 G4 A4:.5 G4:3 G4 G4:.5 F4 G4:.5 A4 G4:.5 F4 C4:2.5 Bb4 Bb4:.5 Bb4 F4:.5 F4 G4:.5 G4 A4:2.5 D4 E4:.5 F4 E4:.5 F4 E4:.5 C4 F4:2.5 A4:1.5 Bb4:1.5 A4 G4 F4:3' },
+  { id: 'akatonbo', e: '🌅', ja: 'あかとんぼ', en: 'Red Dragonfly', zh: '紅蜻蜓', b: '#ffe2d1', bpm: 84,
+    n: 'C4 F4 F4:2 G4 A4 C5 F5 D5 C5:2 D4 F4 F4:2 G4:2 A4:2 A4 D5 C5:2 D5 F5 D5 C5 D5 C5 A4 C5 A4 F4 A4 G4 F4 F4:3' },
+  { id: 'turkish', e: '🎺', ja: 'トルコこうしんきょく', en: 'Turkish March', zh: '土耳其進行曲', b: '#ffe9f2', bpm: 100,
+    n: 'E4:.25 D4:.25 C#4:.25 D4:.25 F4 G4:.25 F4:.25 E4:.25 F4:.25 A4 Bb4:.25 A4:.25 G#4:.25 A4:.25 E5:.25 D5:.25 C#5:.25 D5:.25 E5:.25 D5:.25 C#5:.25 D5:.25 F5 E4:.25 D4:.25 C#4:.25 D4:.25 F4 G4:.25 F4:.25 E4:.25 F4:.25 A4 Bb4:.25 A4:.25 G#4:.25 A4:.25 E5:.25 D5:.25 C#5:.25 D5:.25 E5:.25 D5:.25 C#5:.25 D5:.25 F5 D5:.5 F5:.5 E5:.5 C#5:.5 D5:2' },
 ];
 const NAME = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 function parse(str) {
@@ -326,8 +330,8 @@ function parse(str) {
 }
 SONGS.forEach(s => s.notes = parse(s.n));
 // 子どもが喜びそうな順に並べる
-const ORDER = ['bear', 'kira', 'birthday', 'kaeru', 'chou', 'mary', 'farm', 'camptown', 'alps', 'jingle', 'london',
-  'spider', 'frere', 'row', 'susanna', 'hotcross', 'joy', 'lullaby', 'elise'];
+const ORDER = ['bear', 'kira', 'birthday', 'kaeru', 'chou', 'mary', 'railroad', 'ants', 'farm', 'camptown', 'alps', 'jingle',
+  'london', 'frere', 'row', 'susanna', 'akatonbo', 'turkish', 'joy', 'lullaby', 'elise'];
 SONGS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
 /* ================= うたの進め方 ================= */
@@ -568,6 +572,44 @@ buddy.addEventListener('pointerdown', e => {
   burst(sunFx, x, y, 8, r.fx, buddy.offsetWidth * 1.3);
   setTimeout(() => { buddy.classList.remove(r.cls); bearBusy = false; }, phraseEnd(r.notes));
 });
+
+/* ================= 弾いているあいだ、くまさんと小鳥が見ていて ほめてくれる ================= */
+const PRAISE = {
+  ja: ['じょうず！', 'いいね！', 'すごい！', 'そのちょうし！', 'すてき！', 'きれいな おと！'],
+  en: ['Great!', 'Nice!', 'Wow!', 'Keep going!', 'Lovely!', 'Beautiful!'],
+  zh: ['好棒！', '很好！', '好厲害！', '繼續加油！', '好好聽！', '真漂亮！'],
+};
+let playCount = 0, lookT = null, lastPraise = -1e9;
+const birdInner = document.querySelector('#scene .bird .inner');
+function appX(el) { let x = 0; for (let e = el; e && e !== app; e = e.offsetParent) x += e.offsetLeft; return x; }
+function watchPlay(m) {
+  const key = keyEls.get(m); if (!key) return;
+  // くまさん：弾いている鍵盤のほうを見る
+  const kx = appX(key) + key.offsetWidth / 2, bx = appX(buddy) + buddy.offsetWidth / 2;
+  const look = Math.max(-1, Math.min(1, (kx - bx) / (app.clientWidth / 2)));
+  buddy.style.setProperty('--look', look.toFixed(2));
+  buddy.classList.add('looking');
+  // 小鳥：ちょこんと のぞきこむ
+  if (birdInner && !birdInner.closest('.item')._busy) { birdInner.classList.remove('peek'); void birdInner.getBoundingClientRect(); birdInner.classList.add('peek'); }
+  clearTimeout(lookT);
+  lookT = setTimeout(() => { buddy.classList.remove('looking'); buddy.style.setProperty('--look', 0); }, 1200);
+  // ときどき ほめる
+  playCount++;
+  const now = performance.now();
+  if (playCount >= 10 && now - lastPraise > 6000) { playCount = 0; lastPraise = now; praise(); }
+}
+function praise() {
+  const words = PRAISE[S.lang] || PRAISE.ja;
+  const b = document.createElement('div'); b.className = 'bubble';
+  b.textContent = words[Math.floor(Math.random() * words.length)];
+  const bx = appX(buddy) + buddy.offsetWidth * 0.9, by = buddy.offsetTop + $('#top').offsetTop + 6;
+  b.style.left = bx + 'px'; b.style.top = by + 'px';
+  sunFx.appendChild(b); setTimeout(() => b.remove(), 1900);
+  if (!bearBusy) { buddy.classList.add('b-happy'); setTimeout(() => { if (!bearBusy) buddy.classList.remove('b-happy'); }, 1400); }
+  const W = app.clientWidth, H = app.clientHeight;
+  burst(sunFx, (appX(buddy) + buddy.offsetWidth / 2) / W * 100, (buddy.offsetTop + $('#top').offsetTop + buddy.offsetHeight / 2) / H * 100, 6, ['💖', '✨', '⭐'], buddy.offsetWidth);
+  if (birdInner && !birdInner.closest('.item')._busy) { birdInner.classList.remove('k-tweet'); void birdInner.getBoundingClientRect(); birdInner.classList.add('k-tweet'); setTimeout(() => birdInner.classList.remove('k-tweet'), 1800); }
+}
 
 /* ================= もりの背景（さわると反応） ================= */
 // 画面の位置（指の位置）を #app の中の位置に直す（縦向きで回しているときも）

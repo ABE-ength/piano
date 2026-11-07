@@ -368,3 +368,16 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 .white.sparkle { background: linear-gradient(#fff, var(--c)); }
 .black.sparkle { background: var(--c); }
 @keyframes sparkleKey { 0% { box-shadow: 0 0 0 4px #fff, 0 0 26px 10px var(--c); filter: brightness(1.25); } 100% { box-shadow: 0 0 0 0 transparent; filter: none; } }
+
+/* ---- 弾いているあいだ：くまさんが鍵盤を見る・小鳥がのぞく・ほめる ---- */
+#buddy svg { transition: transform .25s ease-out; }
+#buddy.looking svg { transform: rotate(calc(var(--look, 0) * 14deg)) translateY(4%); }
+#buddy .eyes { transition: transform .2s; }
+#buddy.looking .eyes { transform: translate(calc(var(--look, 0) * 5px), 4px); }
+#scene .bird .inner.peek { animation: peek .5s ease-out; }
+@keyframes peek { 40% { transform: rotate(14deg) translateY(4px); } }
+.bubble { position: absolute; z-index: 6; transform: translate(0, -10%); padding: 6px 14px; border-radius: 18px;
+  background: #fff; color: #ff5f97; font-size: 20px; font-weight: 900; white-space: nowrap;
+  box-shadow: 0 4px 0 rgba(0,0,0,.12); animation: bubble 1.9s ease-out forwards; pointer-events: none; }
+.bubble::before { content: ''; position: absolute; left: -10px; top: 60%; border: 8px solid transparent; border-right-color: #fff; }
+@keyframes bubble { 0% { transform: scale(.2); opacity: 0; } 15% { transform: scale(1.15); opacity: 1; } 25% { transform: scale(1); } 80% { opacity: 1; } 100% { transform: translateY(-14px); opacity: 0; } }
