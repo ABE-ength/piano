@@ -46,10 +46,7 @@
     <div class="left">
       <button id="songBtn" class="pill big">🎵 <span data-i18n="songs">うた</span></button>
       <button id="stopBtn" class="pill big red hidden">⏹ <span data-i18n="stop">やめる</span></button>
-      <div class="seg" id="modeSeg">
-        <button data-v="wait">⭐ <span data-i18n="wait">まってね</span></button>
-        <button data-v="along">🎶 <span data-i18n="along">いっしょに</span></button>
-      </div>
+      <button id="alongBtn" class="pill toggle" aria-pressed="false">🎶 <span data-i18n="along">いっしょに</span></button>
       <div class="seg small" id="speedSeg">
         <button data-v="0.7" data-i18n-aria="slow" aria-label="ゆっくり">🐢</button>
         <button data-v="1" data-i18n-aria="normal" aria-label="ふつう">🚶</button>
@@ -58,7 +55,7 @@
     </div>
     <div id="now" class="hidden"><span id="nowEmoji"></span><span id="nowTitle"></span><div id="bar"><div id="barFill"></div><span id="barGoal">🏁</span><span id="barRunner"></span></div></div>
     <div class="right">
-      <div id="buddy" aria-hidden="true">
+      <div id="buddy" role="button" aria-label="くまさん">
         <svg viewBox="0 0 120 120">
           <circle cx="28" cy="30" r="18" fill="#c98b5a"/><circle cx="92" cy="30" r="18" fill="#c98b5a"/>
           <circle cx="28" cy="30" r="9" fill="#f0c49a"/><circle cx="92" cy="30" r="9" fill="#f0c49a"/>
@@ -66,6 +63,7 @@
           <ellipse cx="60" cy="82" rx="22" ry="17" fill="#f6dcc0"/>
           <g class="eyes"><ellipse cx="42" cy="60" rx="6" ry="8" fill="#3a2a20"/><ellipse cx="78" cy="60" rx="6" ry="8" fill="#3a2a20"/>
           <circle cx="44" cy="57" r="2.2" fill="#fff"/><circle cx="80" cy="57" r="2.2" fill="#fff"/></g>
+          <g class="happyEyes" stroke="#3a2a20" stroke-width="4" fill="none" stroke-linecap="round"><path d="M35 62 Q42 53 49 62"/><path d="M71 62 Q78 53 85 62"/></g>
           <ellipse cx="60" cy="75" rx="7" ry="5" fill="#3a2a20"/>
           <path d="M51 86 Q60 95 69 86" stroke="#3a2a20" stroke-width="3" fill="none" stroke-linecap="round"/>
           <circle cx="30" cy="78" r="7" fill="#ff9aa8" opacity=".7"/><circle cx="90" cy="78" r="7" fill="#ff9aa8" opacity=".7"/>

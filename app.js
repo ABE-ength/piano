@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.8.2';
+const VERSION = '2.9.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -215,7 +215,7 @@ function sparkFx(m) {
 }
 
 const buddy = $('#buddy');
-function hop() { if (buddy.classList.contains('dance')) return; buddy.classList.remove('hop'); void buddy.offsetWidth; buddy.classList.add('hop'); }
+function hop() { if (buddy.classList.contains('dance') || bearBusy) return; buddy.classList.remove('hop'); void buddy.offsetWidth; buddy.classList.add('hop'); }
 
 /* ================= タッチで弾く ================= */
 const downCount = new Map(), pointers = new Map();
@@ -543,6 +543,38 @@ sun.addEventListener('pointerdown', e => {
   setTimeout(() => { sun.className = ''; sunBusy = false; }, r.ms * STRETCH);
 });
 
+/* ================= くまさん（さわると反応） ================= */
+let bearBusy = false, bearLast = -1;
+const BEAR_REACTIONS = [
+  // おどる：たのしいリズム
+  { cls: 'b-dance', ms: 2200, fx: ['🎵', '🎶', '💃', '✨'],
+    notes: [[60, 0, 200], [64, 150, 200], [67, 300, 200], [64, 450, 200], [65, 600, 200], [69, 750, 200], [72, 900, 700, .55], [48, 900, 900, .35], [55, 900, 900, .3]] },
+  // てをふる：こんにちは♪
+  { cls: 'b-wave', ms: 1900, fx: ['👋', '💛', '✨'],
+    notes: [[67, 0, 350], [72, 250, 350], [76, 500, 900, .55], [64, 500, 900, .35], [60, 500, 900, .3]] },
+  // ぴょーん：大ジャンプ
+  { cls: 'b-jump', ms: 2000, fx: ['⭐', '💫', '🌟'],
+    notes: [[60, 0, 250], [62, 90, 250], [64, 180, 250], [67, 270, 250], [72, 360, 400], [76, 450, 900, .6], [67, 1000, 300, .45], [72, 1100, 900, .5]] },
+  // にっこり：ハートいっぱい
+  { cls: 'b-happy', ms: 1800, fx: ['💖', '💕', '🍯', '💗'],
+    notes: [[72, 0, 400], [71, 220, 300], [72, 400, 300], [76, 600, 900, .55], [65, 600, 900, .35], [69, 600, 900, .35]] },
+];
+buddy.addEventListener('pointerdown', e => {
+  e.preventDefault(); e.stopPropagation(); piano.unlock();
+  if (bearBusy || buddy.classList.contains('dance')) return;
+  let i; do { i = Math.floor(Math.random() * BEAR_REACTIONS.length); } while (i === bearLast);
+  bearLast = i;
+  const r = BEAR_REACTIONS[i];
+  bearBusy = true;
+  buddy.classList.remove('hop', 'b-dance', 'b-wave', 'b-jump', 'b-happy'); void buddy.offsetWidth; buddy.classList.add(r.cls);
+  playPhrase(r.notes);
+  const W = app.clientWidth, H = app.clientHeight, top = $('#top');
+  const x = (buddy.offsetLeft + top.offsetLeft + buddy.offsetWidth / 2) / W * 100;
+  const y = (buddy.offsetTop + top.offsetTop + buddy.offsetHeight / 2) / H * 100;
+  burst(sunFx, x, y, 8, r.fx, buddy.offsetWidth * 1.3);
+  setTimeout(() => { buddy.classList.remove(r.cls); bearBusy = false; }, r.ms * STRETCH);
+});
+
 /* ================= くも（さわると反応） ================= */
 // 画面の位置（指の位置）を #app の中の位置に直す（縦向きで回しているときも）
 function toApp(e) {
@@ -682,7 +714,11 @@ function modeChanged() {
   $('#speedSeg').classList.toggle('hidden', S.mode !== 'along');
   if (song.cur) song.start(song.cur);            // 曲の途中なら、はじめからやり直す
 }
-seg('#modeSeg', 'mode', v => v, modeChanged);
+// 「いっしょに」のボタン1つで切り替え（OFF のときは ⭐まってね）
+const alongBtn = $('#alongBtn');
+function markAlong() { const on = S.mode === 'along'; alongBtn.classList.toggle('on', on); alongBtn.setAttribute('aria-pressed', on); }
+alongBtn.onclick = () => { S.mode = S.mode === 'along' ? 'wait' : 'along'; save(); markAlong(); modeChanged(); };
+markAlong();
 seg('#speedSeg', 'speed', v => +v, () => { if (song.cur && S.mode === 'along') song.start(song.cur); });
 $('#speedSeg').classList.toggle('hidden', S.mode !== 'along');
 

@@ -256,7 +256,7 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 .compact .panel h2 { font-size: 18px; margin-bottom: 8px; }
 .compact .panel { padding: 10px 14px 14px; }
 .compact .song { min-width: 0; font-size: 12px; padding: 6px 4px; border-radius: 16px; }
-.narrow #modeSeg span, .narrow #songBtn span, .narrow #stopBtn span { display: none; }
+.narrow #alongBtn span, .narrow #songBtn span, .narrow #stopBtn span { display: none; }
 
 /* ---- ことば（国旗） ---- */
 #flags { display: flex; gap: 6px; background: rgba(255,255,255,.6); border-radius: 999px; padding: 4px; box-shadow: 0 4px 0 rgba(0,0,0,.12); }
@@ -316,3 +316,21 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 @keyframes fillRing { to { --p: 100%; } }
 #lockBtn.locked { background: #ffe1ee; box-shadow: 0 4px 0 rgba(0,0,0,.15), 0 0 0 3px #ff6f9f inset; }
 .compact #lockBtn { width: 44px; height: 44px; }
+
+/* ---- 「いっしょに」の ON / OFF（OFFのときは まってね） ---- */
+#alongBtn { background: rgba(255,255,255,.8); color: #8a7a80; }
+#alongBtn.on { background: #ff9ec7; color: #fff; box-shadow: 0 4px 0 #e0789f; }
+.compact #alongBtn { height: 48px; font-size: 17px; }
+
+/* ---- くまさん（さわると反応） ---- */
+#buddy { cursor: pointer; touch-action: manipulation; }
+#buddy svg { overflow: visible; }
+#buddy.b-dance { animation: dance .5s ease-in-out infinite; }
+#buddy.b-wave { animation: wave .45s ease-in-out 4; transform-origin: 50% 90%; }
+@keyframes wave { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-18deg); } 75% { transform: rotate(18deg); } }
+#buddy.b-jump { animation: bigJump 1s cubic-bezier(.3,1.5,.5,1) 2; }
+@keyframes bigJump { 0%,100% { transform: none; } 30% { transform: translateY(-40%) scale(1.15) rotate(-8deg); } 60% { transform: translateY(0) scale(1.1, .9); } }
+#buddy.b-happy .eyes { opacity: 0; }
+#buddy .happyEyes { display: none; }
+#buddy.b-happy .happyEyes, #buddy.b-dance .happyEyes { display: inline; }
+#buddy.b-dance .eyes { opacity: 0; }
