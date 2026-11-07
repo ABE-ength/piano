@@ -267,7 +267,12 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 @keyframes wiggle { 30% { transform: scale(1.15) rotate(-10deg); } 60% { transform: scale(1.05) rotate(8deg); } }
 .compact .flag { width: 36px; height: 36px; }
 .narrow #flags { gap: 2px; }
-.narrow #buddy { display: none; }
+.narrow #buddy { width: 50px; height: 50px; }
+.narrow #top { gap: 5px; padding-left: 6px; padding-right: 6px; }
+.narrow #top .left, .narrow #top .right { gap: 5px; }
+.narrow .flag { width: 32px; height: 32px; }
+.narrow #lockBtn, .narrow #setBtn { width: 40px; min-width: 40px; height: 40px; }
+.narrow .seg.small button { padding: 0 6px; font-size: 18px; }
 
 /* ---- まってね：同じ鍵盤を続けて押すとき、押すたびに色が変わる ---- */
 .key.target { --g1: #ffd84d; --g2: #ffb800; --g3: rgba(255,200,0,.9); }
@@ -323,7 +328,7 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 .compact #alongBtn { height: 48px; font-size: 17px; }
 
 /* ---- くまさん（さわると反応） ---- */
-#buddy { cursor: pointer; touch-action: manipulation; }
+#buddy { cursor: pointer; touch-action: manipulation; flex-shrink: 0; }
 #buddy svg { overflow: visible; }
 #buddy.b-dance { animation: dance .5s ease-in-out infinite; }
 #buddy.b-wave { animation: wave .45s ease-in-out 4; transform-origin: 50% 90%; }

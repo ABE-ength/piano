@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.9.0';
+const VERSION = '2.9.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -68,7 +68,7 @@ function layout() {
   app.style.width = W + 'px'; app.style.height = H + 'px';
   app.style.transform = portrait ? `translate(${iw}px,0) rotate(90deg)` : 'none';
   app.classList.toggle('compact', H <= 440);
-  app.classList.toggle('narrow', W <= 760);
+  app.classList.toggle('narrow', W <= 900);
 }
 addEventListener('resize', layout);
 layout();
