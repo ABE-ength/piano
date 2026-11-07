@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.7.1';
+const VERSION = '2.8.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -20,6 +20,7 @@ const TEXT = {
     help: '⭐ まってね：光った鍵盤を押すと次へ進みます。<br>🎶 いっしょに：曲に合わせて鍵盤が光ります。🐢🚶🐇 で速さを変えられます。<br>右上のマークで、ことば（英語・日本語・中国語）を切り替えられます。',
     loading: 'じゅんび ちゅう…', loadErr: 'よみこめませんでした。ネットにつないで ひらきなおしてね',
     longpress: 'おとなの人は ながおし してね',
+    lockHold: 'ながおしで ロック', unlockHold: 'ながおしで かいじょ', lockOn: '🔒 ロックしました', lockOff: '🔓 ロックを かいじょしました', locked: '🔒 ロック中（ながおしで かいじょ）',
     notes: ['ド', 'ド', 'レ', 'レ', 'ミ', 'ファ', 'ファ', 'ソ', 'ソ', 'ラ', 'ラ', 'シ'],
   },
   en: {
@@ -31,6 +32,7 @@ const TEXT = {
     help: '⭐ Wait for me: the song moves on when the glowing key is pressed.<br>🎶 Play along: keys light up with the music. Change the speed with 🐢🚶🐇.<br>Tap a mark (top right) to change the language (English / Japanese / Chinese).',
     loading: 'Getting ready…', loadErr: 'Could not load. Please connect to the internet and reopen.',
     longpress: 'Grown-ups: press and hold',
+    lockHold: 'Press and hold to lock', unlockHold: 'Press and hold to unlock', lockOn: '🔒 Locked', lockOff: '🔓 Unlocked', locked: '🔒 Locked (press and hold to unlock)',
     notes: ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'],
   },
 };
@@ -43,6 +45,7 @@ TEXT.zh = {
   help: '⭐ 等等我：按下發光的琴鍵，歌曲才會繼續。<br>🎶 一起彈：琴鍵會跟著音樂發光，可用 🐢🚶🐇 調整速度。<br>右上角的圖示可以切換語言（英文・日文・中文）。',
   loading: '準備中…', loadErr: '無法載入。請連上網路後重新開啟。',
   longpress: '大人請長按',
+  lockHold: '長按即可鎖定', unlockHold: '長按即可解除', lockOn: '🔒 已鎖定', lockOff: '🔓 已解除鎖定', locked: '🔒 鎖定中（長按解除）',
   notes: ['Do', 'Do♯', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si'],
 };
 if (!TEXT[S.lang]) S.lang = 'ja';
@@ -584,6 +587,48 @@ document.querySelectorAll('#scene .cloud').forEach(cl => {
     setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms);
   });
 });
+
+/* ================= 子どもロック ================= */
+// ながおしで ON/OFF。全画面にして上下のバーをかくし、戻るボタンをきかなくする。
+// （ホームボタンと上からの引き下げは、Androidの「画面の固定」と組み合わせて防ぐ）
+const lockBtn = $('#lockBtn');
+let locked = false, lockTimer = null;
+function enterFull() {
+  const el = document.documentElement;
+  try { if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen({ navigationUI: 'hide' }).then(tryLockLandscape).catch(() => {}); } catch (e) {}
+}
+function exitFull() { try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) {} }
+function setLock(on) {
+  locked = on;
+  lockBtn.classList.toggle('locked', on);
+  lockBtn.querySelector('.ic').textContent = on ? '🔒' : '🔓';
+  if (on) {
+    enterFull();
+    history.pushState({ lock: 1 }, ''); history.pushState({ lock: 2 }, '');
+    keepAwake();
+  } else exitFull();
+  toast(T(on ? 'lockOn' : 'lockOff'));
+}
+lockBtn.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  lockBtn.classList.remove('pressing'); void lockBtn.offsetWidth; lockBtn.classList.add('pressing');
+  lockTimer = setTimeout(() => { lockTimer = null; lockBtn.classList.remove('pressing'); setLock(!locked); }, 1200);
+});
+lockBtn.addEventListener('pointerup', () => {
+  lockBtn.classList.remove('pressing');
+  if (lockTimer) { clearTimeout(lockTimer); lockTimer = null; toast(T(locked ? 'unlockHold' : 'lockHold')); }
+});
+lockBtn.addEventListener('pointercancel', () => { lockBtn.classList.remove('pressing'); if (lockTimer) { clearTimeout(lockTimer); lockTimer = null; } });
+lockBtn.addEventListener('contextmenu', e => e.preventDefault());
+// ロック中に戻るボタンを押されたら、その場にとどまる
+addEventListener('popstate', () => {
+  if (!locked) return;
+  history.pushState({ lock: 3 }, '');
+  hideAll();
+  toast(T('locked'));
+}, true);
+// 全画面がとけてしまったら、次にさわったときに全画面にもどす
+document.addEventListener('pointerdown', () => { if (locked && !document.fullscreenElement) enterFull(); }, true);
 
 /* ================= 画面の切り替え ================= */
 let shownAt = 0;

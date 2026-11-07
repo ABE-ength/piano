@@ -305,3 +305,14 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 #volKnob { position: absolute; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%;
   background: #fff; border: 4px solid #ff6f9f; box-shadow: 0 3px 6px rgba(0,0,0,.25); transition: transform .1s; }
 #volSlider.drag #volKnob { transform: scale(1.15); }
+
+/* ---- 子どもロック（ながおしで ON / OFF） ---- */
+@property --p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+#lockBtn { position: relative; padding: 0; width: 48px; overflow: hidden; }
+#lockBtn .ic { position: relative; font-size: 22px; }
+#lockBtn .ring { position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(#ff6f9f var(--p), transparent var(--p)); opacity: .55; --p: 0%; }
+#lockBtn.pressing .ring { animation: fillRing 1.2s linear forwards; }
+@keyframes fillRing { to { --p: 100%; } }
+#lockBtn.locked { background: #ffe1ee; box-shadow: 0 4px 0 rgba(0,0,0,.15), 0 0 0 3px #ff6f9f inset; }
+.compact #lockBtn { width: 44px; height: 44px; }
