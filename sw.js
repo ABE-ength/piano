@@ -1,5 +1,5 @@
 // アプリのファイルとピアノの音をスマホに保存して、ネットがなくても開けるようにする
-const CACHE = 'piano-v2.9.1';
+const CACHE = 'piano-v3.0.0';
 const FILES = [
   "./",
   "index.html",

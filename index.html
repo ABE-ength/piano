@@ -53,9 +53,7 @@
         <button data-v="1.3" data-i18n-aria="fast" aria-label="はやい">🐇</button>
       </div>
     </div>
-    <div id="now" class="hidden"><span id="nowEmoji"></span><span id="nowTitle"></span><div id="bar"><div id="barFill"></div><span id="barGoal">🏁</span><span id="barRunner"></span></div></div>
-    <div class="right">
-      <div id="buddy" role="button" aria-label="くまさん">
+    <div id="buddy" role="button" aria-label="くまさん">
         <svg viewBox="0 0 120 120">
           <circle cx="28" cy="30" r="18" fill="#c98b5a"/><circle cx="92" cy="30" r="18" fill="#c98b5a"/>
           <circle cx="28" cy="30" r="9" fill="#f0c49a"/><circle cx="92" cy="30" r="9" fill="#f0c49a"/>
@@ -68,7 +66,9 @@
           <path d="M51 86 Q60 95 69 86" stroke="#3a2a20" stroke-width="3" fill="none" stroke-linecap="round"/>
           <circle cx="30" cy="78" r="7" fill="#ff9aa8" opacity=".7"/><circle cx="90" cy="78" r="7" fill="#ff9aa8" opacity=".7"/>
         </svg>
-      </div>
+    </div>
+    <div class="right">
+      <div id="now" class="hidden"><span id="nowEmoji"></span><span id="nowTitle"></span><div id="bar"><div id="barFill"></div><span id="barGoal">🏁</span><span id="barRunner"></span></div></div>
       <div id="flags" role="group" aria-label="ことば / Language / 語言">
         <button class="flag" data-lang="en" aria-label="English">
           <svg viewBox="0 0 40 40"><defs><clipPath id="ce"><circle cx="20" cy="20" r="18"/></clipPath></defs>
@@ -98,35 +98,6 @@
     </div>
   </header>
 
-  <div id="sun" role="button" aria-label="たいよう">
-    <div class="glow"></div>
-    <svg viewBox="0 0 100 100">
-      <g class="raysWrap"><g class="rays" stroke="#ffcf33" stroke-width="6" stroke-linecap="round">
-        <line x1="50" y1="2" x2="50" y2="14"/><line x1="50" y1="86" x2="50" y2="98"/><line x1="2" y1="50" x2="14" y2="50"/><line x1="86" y1="50" x2="98" y2="50"/>
-        <line x1="16" y1="16" x2="24" y2="24"/><line x1="76" y1="76" x2="84" y2="84"/><line x1="84" y1="16" x2="76" y2="24"/><line x1="16" y1="84" x2="24" y2="76"/></g></g>
-      <g class="face">
-        <circle cx="50" cy="50" r="30" fill="url(#sunG)"/>
-        <circle cx="33" cy="56" r="4.5" fill="#ff9a7a" opacity=".7" class="blush"/><circle cx="67" cy="56" r="4.5" fill="#ff9a7a" opacity=".7" class="blush"/>
-        <!-- 目 -->
-        <g class="e-normal"><circle cx="40" cy="46" r="4" fill="#6b4a1a"/><circle cx="60" cy="46" r="4" fill="#6b4a1a"/>
-          <circle cx="41.3" cy="44.6" r="1.3" fill="#fff"/><circle cx="61.3" cy="44.6" r="1.3" fill="#fff"/></g>
-        <g class="e-happy" stroke="#6b4a1a" stroke-width="3" fill="none" stroke-linecap="round"><path d="M35 47 Q40 41 45 47"/><path d="M55 47 Q60 41 65 47"/></g>
-        <g class="e-wink"><circle cx="40" cy="46" r="4" fill="#6b4a1a"/><circle cx="41.3" cy="44.6" r="1.3" fill="#fff"/>
-          <path d="M55 46 Q60 50 65 46" stroke="#6b4a1a" stroke-width="3" fill="none" stroke-linecap="round"/></g>
-        <g class="e-wow"><circle cx="40" cy="45" r="5.5" fill="#fff" stroke="#6b4a1a" stroke-width="2"/><circle cx="60" cy="45" r="5.5" fill="#fff" stroke="#6b4a1a" stroke-width="2"/>
-          <circle cx="40" cy="45" r="2.5" fill="#6b4a1a"/><circle cx="60" cy="45" r="2.5" fill="#6b4a1a"/></g>
-        <g class="e-dizzy" stroke="#6b4a1a" stroke-width="2.2" fill="none" stroke-linecap="round">
-          <path d="M40 46 m-4 0 a4 4 0 1 1 4 4 a2.5 2.5 0 1 1 -2 -3"/><path d="M60 46 m-4 0 a4 4 0 1 1 4 4 a2.5 2.5 0 1 1 -2 -3"/></g>
-        <g class="e-cool"><rect x="31" y="40" width="16" height="10" rx="4" fill="#2b2b33"/><rect x="53" y="40" width="16" height="10" rx="4" fill="#2b2b33"/>
-          <rect x="46" y="42" width="8" height="2.5" fill="#2b2b33"/><path d="M34 42 l5 0" stroke="#fff" stroke-width="1.5" opacity=".7"/><path d="M56 42 l5 0" stroke="#fff" stroke-width="1.5" opacity=".7"/></g>
-        <!-- 口 -->
-        <path class="m-smile" d="M40 58 Q50 67 60 58" stroke="#6b4a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <g class="m-laugh"><path d="M38 56 Q50 74 62 56 Z" fill="#8a3a2a" stroke="#6b4a1a" stroke-width="2" stroke-linejoin="round"/><path d="M43 64 Q50 69 57 64 Q50 61 43 64" fill="#ff7b8a"/></g>
-        <ellipse class="m-wow" cx="50" cy="62" rx="5" ry="6.5" fill="#8a3a2a" stroke="#6b4a1a" stroke-width="2"/>
-        <path class="m-wavy" d="M41 61 q3 -3 6 0 t6 0 t6 0" stroke="#6b4a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      </g>
-    </svg>
-  </div>
   <div id="sunFx"></div>
 
   <!-- 鍵盤 -->

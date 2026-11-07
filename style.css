@@ -339,3 +339,12 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 #buddy .happyEyes { display: none; }
 #buddy.b-happy .happyEyes, #buddy.b-dance .happyEyes { display: inline; }
 #buddy.b-dance .eyes { opacity: 0; }
+
+/* ---- くまさんを真ん中に（太陽はなし） ---- */
+#top .left, #top .right { flex: 1 1 0; min-width: 0; }
+#top .right { justify-content: flex-end; }
+#top .right #now { flex: 1 1 auto; min-width: 120px; max-width: 360px; }
+.playing #flags { display: none; }   /* 曲の間は国旗をかくして、曲名ゲージを広く */
+#buddy { width: 84px; height: 84px; margin: 0 4px; }
+.compact #buddy { width: 72px; height: 72px; }
+.narrow #buddy { width: 72px; height: 72px; }

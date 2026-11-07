@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.9.1';
+const VERSION = '3.0.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -68,7 +68,7 @@ function layout() {
   app.style.width = W + 'px'; app.style.height = H + 'px';
   app.style.transform = portrait ? `translate(${iw}px,0) rotate(90deg)` : 'none';
   app.classList.toggle('compact', H <= 440);
-  app.classList.toggle('narrow', W <= 900);
+  app.classList.toggle('narrow', W <= 1100);
 }
 addEventListener('resize', layout);
 layout();
@@ -260,6 +260,8 @@ document.addEventListener('pointerdown', () => piano.unlock(), { capture: true }
 /* ================= うた（10曲） ================= */
 // 音名:拍（拍を省くと1拍）。著作権の切れた曲・昔からの歌のメロディです。
 const SONGS = [
+  { id: 'bear', e: '🐻', ja: 'もりのくまさん', en: 'The Other Day I Met a Bear', zh: '森林裡的熊先生', b: '#f6e3cf', bpm: 120,
+    n: 'G4:.5 F#4:.5 G4 E4:2 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:3 G4:.5 F#4:.5 G4 E4:2 G4:.5 F#4:.5 G4 E4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D#4:.5 E4 C4:2 E4:.5 D4:.5 C4 D4:2 E4:.5 D4:.5 C4 D4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 G4 E4:2 G4:.5 A4:.5 B4:.5 C5:.5 G4:.5 E4:.5 C4 A4:2 A4:.5 B4:.5 A4:.5 G4:.5 F4:.5 E4:.5 D4 C4:4' },
   { id: 'kira', e: '⭐', ja: 'きらきらぼし', en: 'Twinkle Twinkle', zh: '小星星', b: '#fff3b8', bpm: 100,
     n: 'C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2 G4 G4 F4 F4 E4 E4 D4:2 G4 G4 F4 F4 E4 E4 D4:2 C4 C4 G4 G4 A4 A4 G4:2 F4 F4 E4 E4 D4 D4 C4:2' },
   { id: 'birthday', e: '🎂', ja: 'ハッピーバースデー', en: 'Happy Birthday', zh: '生日快樂', b: '#ffe8c2', bpm: 100,
@@ -308,7 +310,7 @@ function parse(str) {
 }
 SONGS.forEach(s => s.notes = parse(s.n));
 // 子どもが喜びそうな順に並べる
-const ORDER = ['kira', 'birthday', 'kaeru', 'chou', 'mary', 'farm', 'camptown', 'alps', 'jingle', 'london',
+const ORDER = ['bear', 'kira', 'birthday', 'kaeru', 'chou', 'mary', 'farm', 'camptown', 'alps', 'jingle', 'london',
   'spider', 'frere', 'row', 'susanna', 'hotcross', 'joy', 'lullaby', 'elise'];
 SONGS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
@@ -327,7 +329,7 @@ const song = {
   start(s) {
     this.stop(true);
     this.cur = s; this.idx = 0;
-    $('#now').classList.remove('hidden');
+    $('#now').classList.remove('hidden'); app.classList.add('playing');
     $('#nowEmoji').textContent = s.e; $('#nowTitle').textContent = s[S.lang];
     $('#songBtn').classList.add('hidden'); $('#stopBtn').classList.remove('hidden');
     this.progress();
@@ -341,7 +343,7 @@ const song = {
     this.guideNotes.clear();
     this.light(null);
     this.cur = null;
-    $('#now').classList.add('hidden');
+    $('#now').classList.add('hidden'); app.classList.remove('playing');
     $('#songBtn').classList.remove('hidden'); $('#stopBtn').classList.add('hidden');
   },
   light(m, count = 0, total = count) {
@@ -486,28 +488,8 @@ function celebrate(s) {
 }
 
 /* ================= たいよう（さわると いろいろ反応） ================= */
-const sun = $('#sun'), sunFx = $('#sunFx');
+const sunFx = $('#sunFx');
 // メロディ：[音, 始まり(ms), 長さ(ms), 強さ]。ド(60)〜ミ(76)は鍵盤も光る
-const SUN_REACTIONS = [
-  // わらう：ころころ はずむメロディ
-  { cls: 'r-laugh', ms: 1700, fx: ['😆', '♪', '♫', '💛'], n: 8,
-    notes: [[67, 0, 300], [64, 150, 300], [67, 300, 300], [64, 450, 300], [69, 600, 300], [67, 750, 300], [72, 900, 900, .6], [48, 900, 1200, .35], [55, 900, 1200, .3]] },
-  // ひかる：ハープのようにキラキラ上がって、やさしい和音
-  { cls: 'r-shine', ms: 2000, fx: ['✨', '🌟', '⭐', '💫'], n: 16,
-    notes: [[60, 0, 1400], [64, 90, 1300], [67, 180, 1200], [72, 270, 1100], [76, 360, 1000], [79, 450, 900, .4], [84, 540, 900, .35], [88, 630, 900, .3], [65, 900, 1100, .35], [69, 900, 1100, .35], [72, 900, 1100, .35]] },
-  // ウインク：ピンポーン♪
-  { cls: 'r-wink',  ms: 1500, fx: ['💖', '💕', '💗'], n: 6,
-    notes: [[76, 0, 500, .6], [72, 260, 900, .55], [64, 260, 900, .3], [67, 260, 900, .3]] },
-  // びっくり：ジャジャーン！
-  { cls: 'r-wow',   ms: 1400, fx: ['❗', '❓', '✨'], n: 6,
-    notes: [[60, 0, 200], [67, 80, 200], [72, 160, 900, .7], [76, 160, 900, .6], [64, 160, 900, .45], [48, 160, 1000, .4]] },
-  // くるくる：上から下へ、ゆらゆら下りる
-  { cls: 'r-spin',  ms: 2600, fx: ['💫', '🌀', '⭐'], n: 8,
-    notes: [[76, 0, 350], [74, 140, 350], [72, 280, 350], [69, 420, 350], [67, 560, 350], [64, 700, 350], [62, 840, 350], [60, 980, 1200, .6], [67, 1120, 1000, .4], [72, 1260, 1000, .45]] },
-  // サングラス：ちょっとおしゃれなフレーズ
-  { cls: 'r-cool',  ms: 2000, fx: ['😎', '✌️', '🎵'], n: 6,
-    notes: [[60, 0, 250], [63, 180, 200], [64, 300, 250], [67, 480, 250], [69, 660, 250], [67, 840, 900, .55], [48, 840, 1000, .35], [57, 840, 1000, .3], [64, 840, 1000, .3]] },
-];
 // メロディを鳴らして、鍵盤もいっしょに光らせる
 const STRETCH = 1.5;   // たいよう・くもの伴奏の長さ（1.5倍）
 function playPhrase(notes) {
@@ -523,25 +505,6 @@ function sparkleKey(m, ms) {
   noteFx(m);
   clearTimeout(el._sp); el._sp = setTimeout(() => el.classList.remove('sparkle'), ms);
 }
-let sunBusy = false, sunLast = -1;
-sun.addEventListener('pointerdown', e => {
-  e.preventDefault(); e.stopPropagation();
-  piano.unlock();
-  if (sunBusy) return;
-  // 前と同じ反応にならないように選ぶ
-  let i; do { i = Math.floor(Math.random() * SUN_REACTIONS.length); } while (i === sunLast);
-  sunLast = i;
-  const r = SUN_REACTIONS[i];
-  sunBusy = true;
-  sun.className = ''; void sun.offsetWidth; sun.classList.add(r.cls);
-  playPhrase(r.notes);
-  // まわりにキラキラなどを飛ばす
-  const W = app.clientWidth, H = app.clientHeight;
-  const x = (sun.offsetLeft + sun.offsetWidth / 2) / W * 100, y = (sun.offsetTop + sun.offsetHeight / 2) / H * 100;
-  burst(sunFx, x, y, r.n, r.fx, sun.offsetWidth * 1.2);
-  hop();
-  setTimeout(() => { sun.className = ''; sunBusy = false; }, r.ms * STRETCH);
-});
 
 /* ================= くまさん（さわると反応） ================= */
 let bearBusy = false, bearLast = -1;
