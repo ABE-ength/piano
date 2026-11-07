@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.3.2';
+const VERSION = '3.3.3';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -288,8 +288,8 @@ const SONGS = [
     n: 'G4 E4 E4:2 F4 D4 D4:2 C4 D4 E4 F4 G4 G4 G4:2 G4 E4 E4 E4 F4 D4 D4 D4 C4 E4 G4 G4 E4 E4 E4:2 D4 D4 D4 D4 D4 E4 F4:2 E4 E4 E4 E4 E4 F4 G4:2 G4 E4 E4:2 F4 D4 D4:2 C4 E4 G4 G4 C4:4' },
   { id: 'mary', e: '🐑', ja: 'メリーさんのひつじ', en: 'Mary Had a Little Lamb', zh: '瑪莉有隻小綿羊', b: '#f3ecff', bpm: 110,
     n: 'E4:1.5 D4:.5 C4 D4 E4 E4 E4:2 D4 D4 D4:2 E4 G4 G4:2 E4:1.5 D4:.5 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4:4' },
-  { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', zh: '王老先生有塊地', b: '#e9f7d4', bpm: 120,
-    n: 'F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:3 C4 C4:.5 C4:.5 F4 F4 F4:2 C4:.5 C4:.5 F4 F4 F4:2 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4 F4:.5 F4:.5 F4:.5 F4:.5 F4 F4 F4 F4 F4 C4 D4 D4 C4:2 A4 A4 G4 G4 F4:4' },
+  { id: 'farm', e: '🐮', ja: 'ゆかいな まきば', en: 'Old MacDonald', zh: '王老先生有塊地', b: '#e9f7d4', bpm: 110,
+    n: 'G4:.5 G4:.5 G4:.5 D4:.5 E4:.5 E4:.5 D4:.5 R:.5 B4:.5 B4:.5 A4:.5 A4:.5 G4:1.5 D4:.5 G4:.5 G4:.5 G4:.5 D4:.5 E4:.5 E4:.5 D4:.5 R:.5 B4:.5 B4:.5 A4:.5 A4:.5 G4:1.5 D4:.5 G4:.5 G4:.5 G4:.5 D4:.5 G4:.5 G4:.5 G4:.5 R:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 G4:.5 D4:.5 E4:.5 E4:.5 D4:.5 R:.5 B4:.5 B4:.5 A4:.5 A4:.5 G4:1.5 R:.5' },
   { id: 'alps', e: '🏔️', ja: 'アルプスいちまんじゃく', en: 'Yankee Doodle', zh: '洋基歌', b: '#e3f0ff', bpm: 150,
     n: 'F4 F4 G4 A4 F4 A4 G4 C4 F4 F4 G4 A4 F4:2 E4:2 F4 F4 G4 A4 Bb4 A4 G4 F4 E4 C4 D4 E4 F4:2 F4:2' },
   { id: 'jingle', e: '🔔', ja: 'ジングルベル', en: 'Jingle Bells', zh: '鈴兒響叮噹', b: '#ffdcdc', bpm: 130,
@@ -330,9 +330,9 @@ function parse(str) {
   });
 }
 SONGS.forEach(s => { s.timed = parse(s.n); s.notes = s.timed.filter(x => x.m != null); });   // timed は休符つき
-// 子どもが喜びそうな順に並べる
-const ORDER = ['bear', 'kira', 'birthday', 'kaeru', 'chou', 'mary', 'railroad', 'ants', 'farm', 'camptown', 'alps', 'jingle',
-  'london', 'frere', 'row', 'susanna', 'akatonbo', 'turkish', 'joy', 'lullaby', 'elise'];
+// 1番目は もりのくまさん、あとは かんたんな順（左上がいちばん かんたん）
+const ORDER = ['bear', 'kaeru', 'mary', 'kira', 'joy', 'london', 'chou', 'camptown', 'farm', 'jingle', 'row',
+  'alps', 'birthday', 'frere', 'akatonbo', 'lullaby', 'susanna', 'ants', 'railroad', 'elise', 'turkish'];
 SONGS.sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
 /* ================= うたの進め方 ================= */
