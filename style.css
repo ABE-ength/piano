@@ -361,3 +361,10 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 #buddy { width: 109px; height: 109px; margin: -8px 4px -14px; }
 .compact #buddy { width: 94px; height: 94px; }
 .narrow #buddy { width: 94px; height: 94px; }
+
+/* ---- 背景・くまさんにさわったときの効果（鍵盤が光る・落ちてくる） ---- */
+@keyframes dropFall { to { margin-top: 170px; opacity: 0; } }
+.key.sparkle { animation: sparkleKey .7s ease-out; }
+.white.sparkle { background: linear-gradient(#fff, var(--c)); }
+.black.sparkle { background: var(--c); }
+@keyframes sparkleKey { 0% { box-shadow: 0 0 0 4px #fff, 0 0 26px 10px var(--c); filter: brightness(1.25); } 100% { box-shadow: 0 0 0 0 transparent; filter: none; } }

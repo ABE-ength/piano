@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.2.1';
+const VERSION = '3.2.2';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -587,7 +587,7 @@ function fallFx(p, items, n, gap) {
 const SCENE_REACTIONS = {
   // りんごの枝：ゆさゆさ ゆれて、りんごと葉っぱが ぽとぽと落ちる
   apple: { cls: 'k-shake', ms: 4400, run(p) {
-      fallFx(p, ['🍎', '🍃', '🍎', '🍂'], 14, 280);
+      fallFx(p, ['🍃', '🍂', '🍎', '🍃'], 14, 280);
       const pent = [76, 74, 72, 69, 67, 64, 62, 60];
       const notes = [];
       for (let i = 0; i < 14; i++) notes.push([i * 1.55 + (i % 2) * .3, pent[Math.floor(Math.random() * pent.length)], 1.2, i % 4 === 0 ? .45 : .33]);
