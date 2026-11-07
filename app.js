@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.8.0';
+const VERSION = '2.8.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -604,7 +604,6 @@ function setLock(on) {
   lockBtn.querySelector('.ic').textContent = on ? '🔒' : '🔓';
   if (on) {
     enterFull();
-    history.pushState({ lock: 1 }, ''); history.pushState({ lock: 2 }, '');
     keepAwake();
   } else exitFull();
   toast(T(on ? 'lockOn' : 'lockOff'));
@@ -620,12 +619,19 @@ lockBtn.addEventListener('pointerup', () => {
 });
 lockBtn.addEventListener('pointercancel', () => { lockBtn.classList.remove('pressing'); if (lockTimer) { clearTimeout(lockTimer); lockTimer = null; } });
 lockBtn.addEventListener('contextmenu', e => e.preventDefault());
-// ロック中に戻るボタンを押されたら、その場にとどまる
+// 戻るボタンでアプリが閉じないようにする（ロックしていなくても）
+// さわるたびに「戻る用の段」を2段つみなおしておき、戻るボタンはその段を1つ使うだけにする
+function guardBack() {
+  const st = history.state && history.state.g;
+  if (st === 2) return;
+  if (st !== 1) history.pushState({ g: 1 }, '');
+  history.pushState({ g: 2 }, '');
+}
+document.addEventListener('pointerdown', guardBack, true);
 addEventListener('popstate', () => {
-  if (!locked) return;
-  history.pushState({ lock: 3 }, '');
-  hideAll();
-  toast(T('locked'));
+  hideAll();                                   // 開いている画面（うた選びなど）は閉じる
+  if (history.state && history.state.g === 1) history.pushState({ g: 2 }, '');
+  if (locked) toast(T('locked'));
 }, true);
 // 全画面がとけてしまったら、次にさわったときに全画面にもどす
 document.addEventListener('pointerdown', () => { if (locked && !document.fullscreenElement) enterFull(); }, true);
