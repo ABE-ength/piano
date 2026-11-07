@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.8.1';
+const VERSION = '2.8.2';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -509,12 +509,13 @@ const SUN_REACTIONS = [
     notes: [[60, 0, 250], [63, 180, 200], [64, 300, 250], [67, 480, 250], [69, 660, 250], [67, 840, 900, .55], [48, 840, 1000, .35], [57, 840, 1000, .3], [64, 840, 1000, .3]] },
 ];
 // メロディを鳴らして、鍵盤もいっしょに光らせる
+const STRETCH = 1.5;   // たいよう・くもの伴奏の長さ（1.5倍）
 function playPhrase(notes) {
-  notes.forEach(([m, d, len, v = .5]) => setTimeout(() => {
+  notes.forEach(([m, d0, len0, v = .5]) => { const d = d0 * STRETCH, len = len0 * STRETCH; setTimeout(() => {
     piano.noteOn(m, v);
     sparkleKey(m, Math.min(len, 700));
     setTimeout(() => { if (!downCount.has(m)) piano.noteOff(m); }, len);
-  }, d));
+  }, d); });
 }
 function sparkleKey(m, ms) {
   const el = keyEls.get(m); if (!el || song.cur) return;
@@ -539,7 +540,7 @@ sun.addEventListener('pointerdown', e => {
   const x = (sun.offsetLeft + sun.offsetWidth / 2) / W * 100, y = (sun.offsetTop + sun.offsetHeight / 2) / H * 100;
   burst(sunFx, x, y, r.n, r.fx, sun.offsetWidth * 1.2);
   hop();
-  setTimeout(() => { sun.className = ''; sunBusy = false; }, r.ms);
+  setTimeout(() => { sun.className = ''; sunBusy = false; }, r.ms * STRETCH);
 });
 
 /* ================= くも（さわると反応） ================= */
@@ -557,8 +558,8 @@ const CLOUD_REACTIONS = [
         d.style.left = (p.x + (Math.random() - .5) * 90) + 'px'; d.style.top = (p.y + 10) + 'px';
         sunFx.appendChild(d); setTimeout(() => d.remove(), 1100);
         const m = pent[Math.floor(Math.random() * pent.length)];
-        piano.noteOn(m, 0.38); sparkleKey(m, 400); setTimeout(() => piano.noteOff(m), 500);
-      }, 150 + i * 160);
+        piano.noteOn(m, 0.38); sparkleKey(m, 500); setTimeout(() => piano.noteOff(m), 750);
+      }, (150 + i * 160) * STRETCH);
   } },
   // ぽよん：ふわふわはずむ
   { cls: 'k-boing', ms: 1200, run(p) {
@@ -584,7 +585,7 @@ document.querySelectorAll('#scene .cloud').forEach(cl => {
     cl._busy = true;
     cin.classList.remove('k-rain', 'k-boing', 'k-rainbow'); void cin.getBoundingClientRect(); cin.classList.add(r.cls);
     r.run(toApp(e));
-    setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms);
+    setTimeout(() => { cin.classList.remove(r.cls); cl._busy = false; }, r.ms * STRETCH);
   });
 });
 
