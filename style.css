@@ -21,9 +21,44 @@ button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
 @keyframes drift2 { from { transform: translate(-200px, 150px); } to { transform: translate(1700px, 150px); } }
 @keyframes drift3 { from { transform: translate(-200px, 20px); } to { transform: translate(1700px, 20px); } }
 
-#sun { position: absolute; top: 2%; left: 46%; width: 11%; aspect-ratio: 1; pointer-events: none; }
-#sun svg { width: 100%; height: 100%; overflow: visible; }
+/* ---- たいよう（さわると反応する） ---- */
+#sun { position: absolute; top: 2%; left: 46%; width: 11%; aspect-ratio: 1; z-index: 2; cursor: pointer; touch-action: manipulation; }
+#sun svg { position: relative; width: 100%; height: 100%; overflow: visible; }
 #sun .rays { transform-origin: 50px 50px; animation: spin 18s linear infinite; }
+#sun .raysWrap, #sun .face { transform-origin: 50px 50px; transition: transform .3s; }
+#sun .glow { position: absolute; inset: -10%; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, rgba(255,250,190,1) 0%, rgba(255,220,80,.7) 40%, rgba(255,210,60,0) 70%); }
+#sun .e-happy, #sun .e-wink, #sun .e-wow, #sun .e-dizzy, #sun .e-cool,
+#sun .m-laugh, #sun .m-wow, #sun .m-wavy { display: none; }
+#sun.r-laugh .e-normal, #sun.r-shine .e-normal, #sun.r-wink .e-normal, #sun.r-wow .e-normal, #sun.r-spin .e-normal, #sun.r-cool .e-normal { display: none; }
+#sun.r-laugh .m-smile, #sun.r-wow .m-smile, #sun.r-spin .m-smile, #sun.r-shine .m-smile { display: none; }
+#sun.r-laugh .e-happy, #sun.r-shine .e-happy, #sun.r-laugh .m-laugh, #sun.r-shine .m-laugh { display: inline; }
+#sun.r-wink .e-wink, #sun.r-wow .e-wow, #sun.r-wow .m-wow, #sun.r-spin .e-dizzy, #sun.r-spin .m-wavy, #sun.r-cool .e-cool { display: inline; }
+/* 1 わらう：ぴょんぴょん */
+#sun.r-laugh { animation: sunLaugh .9s ease-in-out; }
+@keyframes sunLaugh { 15%,45%,75% { transform: translateY(-14%) rotate(-6deg); } 30%,60%,90% { transform: translateY(0) rotate(6deg); } }
+/* 2 ひかる：まぶしく光る */
+#sun.r-shine .glow { animation: sunGlow 1.4s ease-out; }
+#sun.r-shine .raysWrap { transform: scale(1.35); }
+#sun.r-shine .rays { animation-duration: 1.2s; }
+@keyframes sunGlow { 0% { opacity: 0; transform: scale(.6); } 25% { opacity: 1; transform: scale(2.2); } 100% { opacity: 0; transform: scale(2.6); } }
+/* 3 ウインク */
+#sun.r-wink .face { transform: rotate(-12deg) scale(1.08); }
+/* 4 びっくり：とびあがる */
+#sun.r-wow { animation: sunWow .8s cubic-bezier(.2,1.6,.4,1); }
+@keyframes sunWow { 0% { transform: scale(1); } 30% { transform: translateY(-22%) scale(1.25); } 100% { transform: none; } }
+/* 5 くるくる → めがまわる */
+#sun.r-spin { animation: sunSpin 1s ease-in-out; }
+@keyframes sunSpin { from { transform: rotate(0); } to { transform: rotate(720deg); } }
+#sun.r-spin .face { animation: wobble .5s ease-in-out 1s 3; }
+@keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+/* 6 サングラスでかっこよく */
+#sun.r-cool .face { animation: coolNod .6s ease-in-out 2; }
+@keyframes coolNod { 50% { transform: rotate(8deg) translateY(4%); } }
+#sunFx { position: absolute; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+/* 上の帯のすき間は、たいようをさわれるように素通りさせる */
+#top { pointer-events: none; }
+#top > * { pointer-events: auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---- 上の帯 ---- */

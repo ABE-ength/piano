@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '2.5.1';
+const VERSION = '2.6.0';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -481,6 +481,36 @@ function celebrate(s) {
   setTimeout(() => row.classList.remove('wait'), 1800);
   fanfare();
 }
+
+/* ================= たいよう（さわると いろいろ反応） ================= */
+const sun = $('#sun'), sunFx = $('#sunFx');
+const SUN_REACTIONS = [
+  { cls: 'r-laugh', ms: 1300, fx: ['😆', '♪', '♫', '💛'], n: 8,  notes: [[79, 0], [76, 110], [79, 220], [76, 330], [84, 460]] },
+  { cls: 'r-shine', ms: 1600, fx: ['✨', '🌟', '⭐', '💫'], n: 16, notes: [[72, 0], [76, 60], [79, 120], [84, 180], [88, 240], [91, 300], [96, 360]] },
+  { cls: 'r-wink',  ms: 1300, fx: ['💖', '💕', '💗'],      n: 6,  notes: [[76, 0], [84, 160]] },
+  { cls: 'r-wow',   ms: 1200, fx: ['❗', '❓', '✨'],       n: 6,  notes: [[72, 0], [76, 40], [79, 80], [84, 120]] },
+  { cls: 'r-spin',  ms: 2600, fx: ['💫', '🌀', '⭐'],      n: 8,  notes: [[96, 0], [91, 90], [88, 180], [84, 270], [79, 360], [76, 450], [72, 540]] },
+  { cls: 'r-cool',  ms: 1700, fx: ['😎', '✌️', '🎵'],      n: 6,  notes: [[48, 0], [55, 0], [60, 250], [64, 250], [67, 250]] },
+];
+let sunBusy = false, sunLast = -1;
+sun.addEventListener('pointerdown', e => {
+  e.preventDefault(); e.stopPropagation();
+  piano.unlock();
+  if (sunBusy) return;
+  // 前と同じ反応にならないように選ぶ
+  let i; do { i = Math.floor(Math.random() * SUN_REACTIONS.length); } while (i === sunLast);
+  sunLast = i;
+  const r = SUN_REACTIONS[i];
+  sunBusy = true;
+  sun.className = ''; void sun.offsetWidth; sun.classList.add(r.cls);
+  r.notes.forEach(([m, d]) => setTimeout(() => { piano.noteOn(m, 0.45); setTimeout(() => piano.noteOff(m), 400); }, d));
+  // まわりにキラキラなどを飛ばす
+  const W = app.clientWidth, H = app.clientHeight;
+  const x = (sun.offsetLeft + sun.offsetWidth / 2) / W * 100, y = (sun.offsetTop + sun.offsetHeight / 2) / H * 100;
+  burst(sunFx, x, y, r.n, r.fx, sun.offsetWidth * 1.2);
+  hop();
+  setTimeout(() => { sun.className = ''; sunBusy = false; }, r.ms);
+});
 
 /* ================= 画面の切り替え ================= */
 let shownAt = 0;
