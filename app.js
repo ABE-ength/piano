@@ -1,5 +1,5 @@
 'use strict';
-const VERSION = '3.2.0';
+const VERSION = '3.2.1';
 const $ = s => document.querySelector(s);
 const app = $('#app');
 
@@ -779,10 +779,20 @@ kb.addEventListener('pointerdown', keepAwake, { once: true });
 
 // オフライン対応・自動更新
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
-  let reloaded = !navigator.serviceWorker.controller;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloaded || downCount.size || song.cur) return;
+  // 新しい版がないか、開いたとき・画面にもどったとき・3分ごとに確かめる
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    const check = () => reg.update().catch(() => {});
+    check();
+    setInterval(check, 3 * 60 * 1000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+  }).catch(() => {});
+  // 新しい版に切りかわったら、遊んでいないときに自動で読みなおす
+  let reloaded = !navigator.serviceWorker.controller, pending = false;
+  const tryReload = () => {
+    if (reloaded) return;
+    if (downCount.size || song.cur || !$('#done').classList.contains('hidden')) { pending = true; return; }
     reloaded = true; location.reload();
-  });
+  };
+  navigator.serviceWorker.addEventListener('controllerchange', tryReload);
+  setInterval(() => { if (pending) tryReload(); }, 3000);
 }
